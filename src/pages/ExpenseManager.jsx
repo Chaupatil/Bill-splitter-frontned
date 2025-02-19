@@ -264,10 +264,10 @@ export const ExpenseManager = () => {
     }
   };
 
-  const handleAddFriend = async () => {
+  const handleAddFriend = async (name = "") => {
     if (!currentGroup) return;
 
-    const updatedFriends = [...currentGroup.friends, ""];
+    const updatedFriends = [...currentGroup.friends, name];
 
     try {
       setLoading(true);

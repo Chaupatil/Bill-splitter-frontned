@@ -102,10 +102,16 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                       {...field}
                       className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="">Select person</option>
+                      <option className="bg-gray-800 text-white" value="">
+                        Select person
+                      </option>
                       {friends.map((friend, index) =>
                         friend ? (
-                          <option key={index} value={friend}>
+                          <option
+                            key={index}
+                            value={friend}
+                            className="bg-gray-900 text-white"
+                          >
                             {friend}
                           </option>
                         ) : null

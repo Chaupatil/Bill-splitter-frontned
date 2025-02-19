@@ -72,6 +72,7 @@ export const FriendsList = ({
       return;
     }
 
+    // Directly pass the name to parent component
     addFriend(newFriendName.trim());
     setNewFriendName("");
     toast({
@@ -137,7 +138,12 @@ export const FriendsList = ({
           placeholder="New friend's name"
           className="flex-1"
           maxLength={50}
-          onKeyPress={(e) => e.key === "Enter" && handleAddFriend()}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAddFriend();
+            }
+          }}
         />
         <Button
           variant="outline"
