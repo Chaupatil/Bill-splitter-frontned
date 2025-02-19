@@ -2,7 +2,7 @@ export const expenseGroupService = {
   // Get all expense groups
   getGroups: async () => {
     const response = await fetch(
-      "https://bill-splitter-backend-peach.vercel.app//api/expense-groups"
+      "https://bill-splitter-backend-peach.vercel.app/api/expense-groups"
     );
     if (!response.ok) throw new Error("Failed to fetch groups");
     return response.json();
@@ -11,7 +11,7 @@ export const expenseGroupService = {
   // Get single group
   getGroup: async (groupId) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}`
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}`
     );
     if (!response.ok) throw new Error("Failed to fetch group");
     return response.json();
@@ -20,7 +20,7 @@ export const expenseGroupService = {
   // Create new group
   createGroup: async (groupData) => {
     const response = await fetch(
-      "https://bill-splitter-backend-peach.vercel.app//api/expense-groups",
+      "https://bill-splitter-backend-peach.vercel.app/api/expense-groups",
       {
         method: "POST",
         headers: {
@@ -36,7 +36,7 @@ export const expenseGroupService = {
   // Update group
   updateGroup: async (groupId, groupData) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}`,
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}`,
       {
         method: "PUT",
         headers: {
@@ -52,7 +52,7 @@ export const expenseGroupService = {
   // Delete group
   deleteGroup: async (groupId) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}`,
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}`,
       {
         method: "DELETE",
       }
@@ -70,7 +70,7 @@ export const expenseGroupService = {
   // Add expense
   addExpense: async (groupId, expenseData) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}/expenses`,
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}/expenses`,
       {
         method: "POST",
         headers: {
@@ -86,7 +86,7 @@ export const expenseGroupService = {
   // Delete expense
   deleteExpense: async (groupId, expenseId) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}/expenses/${expenseId}`,
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}/expenses/${expenseId}`,
       {
         method: "DELETE",
       }
@@ -98,7 +98,7 @@ export const expenseGroupService = {
   // Complete settlement
   completeSettlement: async (groupId, settlementId) => {
     const response = await fetch(
-      `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${groupId}/settlements/${settlementId}/complete`,
+      `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${groupId}/settlements/${settlementId}/complete`,
       {
         method: "POST",
       }

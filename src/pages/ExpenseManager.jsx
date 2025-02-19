@@ -78,7 +78,7 @@ export const ExpenseManager = () => {
 
     try {
       const response = await fetch(
-        `https://bill-splitter-backend-peach.vercel.app//api/expense-groups/${currentGroupId}/settlements`
+        `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${currentGroupId}/settlements`
       );
       if (!response.ok) throw new Error("Failed to fetch settlements");
       const data = await response.json();
