@@ -30,7 +30,9 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { Home } from "./pages/Home";
 import { ExpenseManager } from "./pages/ExpenseManager";
-import { Navbar, Login, Register } from "./components/Auth";
+import Register from "./pages/Register";
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
