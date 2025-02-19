@@ -21,8 +21,19 @@ export const FriendsList = ({
 }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [friendToDelete, setFriendToDelete] = useState(null);
+  const [newFriendName, setNewFriendName] = useState("");
 
   const handleDeleteClick = (index) => {
+    // Check if deleting would leave fewer than 2 friends
+    if (friends.length <= 2) {
+      toast({
+        title: "Cannot remove friend",
+        description: "You need at least 2 friends in the list.",
+        variant: "warning",
+      });
+      return;
+    }
+
     setFriendToDelete(index);
     setDeleteDialogOpen(true);
   };
@@ -38,17 +49,35 @@ export const FriendsList = ({
   };
 
   const handleAddFriend = () => {
-    // Check if there's any empty friend field
-    if (friends.some((friend) => !friend.trim())) {
+    if (!newFriendName.trim()) {
       toast({
         title: "Warning",
-        description:
-          "Please fill in all existing friend names before adding a new one.",
+        description: "Please enter a friend name.",
         variant: "warning",
       });
       return;
     }
-    addFriend();
+
+    // Prevent duplicate names
+    const isDuplicate = friends.some(
+      (friend) => friend.toLowerCase() === newFriendName.toLowerCase().trim()
+    );
+
+    if (isDuplicate) {
+      toast({
+        title: "Warning",
+        description: "This friend name already exists in the list.",
+        variant: "warning",
+      });
+      return;
+    }
+
+    addFriend(newFriendName.trim());
+    setNewFriendName("");
+    toast({
+      title: "Friend added",
+      description: "New friend has been added to the list.",
+    });
   };
 
   const handleFriendUpdate = (index, value) => {
@@ -81,7 +110,7 @@ export const FriendsList = ({
 
       <div className="space-y-2">
         {friends.map((friend, index) => (
-          <div key={index} className="flex gap-2 items-center group">
+          <div key={index} className="flex gap-2 items-center">
             <Input
               value={friend}
               onChange={(e) => handleFriendUpdate(index, e.target.value)}
@@ -89,30 +118,36 @@ export const FriendsList = ({
               className="flex-1"
               maxLength={50}
             />
-            {friends.length > 1 && (
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => handleDeleteClick(index)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Remove friend"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => handleDeleteClick(index)}
+              title="Remove friend"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ))}
       </div>
 
-      <Button
-        variant="outline"
-        onClick={handleAddFriend}
-        disabled={loading || friends.length >= 20}
-        className="w-full"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Friend
-      </Button>
+      <div className="flex gap-2 items-center mt-4">
+        <Input
+          value={newFriendName}
+          onChange={(e) => setNewFriendName(e.target.value)}
+          placeholder="New friend's name"
+          className="flex-1"
+          maxLength={50}
+          onKeyPress={(e) => e.key === "Enter" && handleAddFriend()}
+        />
+        <Button
+          variant="outline"
+          onClick={handleAddFriend}
+          disabled={loading || friends.length >= 20}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add
+        </Button>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

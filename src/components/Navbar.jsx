@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Menu, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const Navbar = () => {
           </Link>
 
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
+
             {user ? (
               <>
                 <Link to="/expenses">

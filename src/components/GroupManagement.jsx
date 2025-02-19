@@ -55,7 +55,7 @@ export const GroupManagement = ({
       return false;
     }
 
-    const isDuplicate = localExpenseGroups.some(
+    const isDuplicate = expenseGroups.some(
       (group) =>
         group.name.toLowerCase() === name.toLowerCase().trim() &&
         group._id !== currentGroupId
@@ -134,16 +134,6 @@ export const GroupManagement = ({
     if (!validFriends) return;
 
     createNewGroup(validFriends);
-    // Update local state immediately
-    setLocalExpenseGroups((prev) => [
-      ...prev,
-      {
-        _id: Date.now().toString(), // Temporary ID until server response
-        name: newGroupName,
-        friends: validFriends,
-      },
-    ]);
-
     setIsCreateOpen(false);
     setGroupFriends([""]);
     setNewGroupName("");
@@ -165,15 +155,6 @@ export const GroupManagement = ({
       friends: validFriends,
     });
 
-    // Update local state immediately
-    setLocalExpenseGroups((prev) =>
-      prev.map((group) =>
-        group._id === currentGroupId
-          ? { ...group, name: editGroupName, friends: validFriends }
-          : group
-      )
-    );
-
     setIsEditOpen(false);
 
     toast({
@@ -184,10 +165,6 @@ export const GroupManagement = ({
 
   const handleDeleteGroup = () => {
     deleteGroup(currentGroupId);
-    // Update local state immediately
-    setLocalExpenseGroups((prev) =>
-      prev.filter((group) => group._id !== currentGroupId)
-    );
     setIsDeleteOpen(false);
 
     toast({
