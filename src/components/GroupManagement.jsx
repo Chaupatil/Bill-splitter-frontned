@@ -195,10 +195,10 @@ export const GroupManagement = ({
                   <SelectItem key={group._id} value={group._id}>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      {group.name}
                       <span className="text-xs text-muted-foreground">
                         ({group.friends.length})
                       </span>
+                      {group.name}
                     </div>
                   </SelectItem>
                 ))}

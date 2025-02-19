@@ -501,6 +501,7 @@ export const ExpenseManager = () => {
               groupId={currentGroupId}
               settlements={settlements}
               onSettlementsUpdated={loadSettlements}
+              summary={summary}
             />
           </TabsContent>
         </Tabs>
