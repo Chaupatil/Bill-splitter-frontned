@@ -23,6 +23,11 @@ export const ExpenseManager = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const { toast } = useToast();
 
+  const API_URL =
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_API_URL_DEV
+      : import.meta.env.VITE_API_URL_PROD;
+
   // Load expense groups on mount
   useEffect(() => {
     loadExpenseGroups();
@@ -76,9 +81,31 @@ export const ExpenseManager = () => {
   const loadSettlements = async () => {
     if (!currentGroupId) return;
 
+    // Retrieve the entire user object from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    // Check if the user object and the token exist
+    if (!user || !user.token) {
+      toast({
+        title: "Error",
+        description: "No token found, please log in again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const token = user.token;
+
     try {
       const response = await fetch(
-        `https://bill-splitter-backend-peach.vercel.app/api/expense-groups/${currentGroupId}/settlements`
+        `${API_URL}api/expense-groups/${currentGroupId}/settlements`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (!response.ok) throw new Error("Failed to fetch settlements");
       const data = await response.json();
