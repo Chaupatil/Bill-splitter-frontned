@@ -15,7 +15,7 @@ const API_URL =
 export const expenseGroupService = {
   // Get all expense groups
   getGroups: async () => {
-    const response = await fetch(`${API_URL}api/expense-groups`, {
+    const response = await fetch(`${API_URL}/api/expense-groups`, {
       headers: getHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch groups");
@@ -24,7 +24,7 @@ export const expenseGroupService = {
 
   // Get single group
   getGroup: async (groupId) => {
-    const response = await fetch(`${API_URL}api/expense-groups/${groupId}`, {
+    const response = await fetch(`${API_URL}/api/expense-groups/${groupId}`, {
       headers: getHeaders(),
     });
     if (!response.ok) throw new Error("Failed to fetch group");
@@ -33,7 +33,7 @@ export const expenseGroupService = {
 
   // Create new group
   createGroup: async (groupData) => {
-    const response = await fetch(`${API_URL}api/expense-groups`, {
+    const response = await fetch(`${API_URL}/api/expense-groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export const expenseGroupService = {
 
   // Update group
   updateGroup: async (groupId, groupData) => {
-    const response = await fetch(`${API_URL}api/expense-groups/${groupId}`, {
+    const response = await fetch(`${API_URL}/api/expense-groups/${groupId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export const expenseGroupService = {
 
   // Delete group
   deleteGroup: async (groupId) => {
-    const response = await fetch(`${API_URL}api/expense-groups/${groupId}`, {
+    const response = await fetch(`${API_URL}/api/expense-groups/${groupId}`, {
       method: "DELETE",
       headers: getHeaders(),
     });
@@ -78,7 +78,7 @@ export const expenseGroupService = {
   // Add expense
   addExpense: async (groupId, expenseData) => {
     const response = await fetch(
-      `${API_URL}api/expense-groups/${groupId}/expenses`,
+      `${API_URL}/api/expense-groups/${groupId}/expenses`,
       {
         method: "POST",
         headers: {
@@ -95,7 +95,7 @@ export const expenseGroupService = {
   // Delete expense
   deleteExpense: async (groupId, expenseId) => {
     const response = await fetch(
-      `${API_URL}api/expense-groups/${groupId}/expenses/${expenseId}`,
+      `${API_URL}/api/expense-groups/${groupId}/expenses/${expenseId}`,
       {
         method: "DELETE",
         headers: getHeaders(),
@@ -108,7 +108,7 @@ export const expenseGroupService = {
   // Complete settlement
   completeSettlement: async (groupId, settlementId) => {
     const response = await fetch(
-      `${API_URL}api/expense-groups/${groupId}/settlements/${settlementId}/complete`,
+      `${API_URL}/api/expense-groups/${groupId}/settlements/${settlementId}/complete`,
       {
         method: "POST",
         headers: getHeaders(),

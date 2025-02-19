@@ -98,7 +98,7 @@ export const ExpenseManager = () => {
 
     try {
       const response = await fetch(
-        `${API_URL}api/expense-groups/${currentGroupId}/settlements`,
+        `${API_URL}/api/expense-groups/${currentGroupId}/settlements`,
         {
           method: "GET",
           headers: {
