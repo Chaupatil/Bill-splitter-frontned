@@ -227,27 +227,6 @@ export const ExpenseManager = () => {
     }
   };
 
-  const handleUpdateFriend = async (index, value) => {
-    if (!currentGroup) return;
-
-    const updatedFriends = [...currentGroup.friends];
-    updatedFriends[index] = value;
-
-    try {
-      await expenseGroupService.updateGroup(currentGroupId, {
-        ...currentGroup,
-        friends: updatedFriends.filter((friend) => friend.trim()),
-      });
-      await loadCurrentGroup();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update friend",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleRemoveFriend = async (index) => {
     if (!currentGroup) return;
 
@@ -258,6 +237,23 @@ export const ExpenseManager = () => {
         ...currentGroup,
         friends: updatedFriends,
       });
+
+      // Update local currentGroup state immediately
+      setCurrentGroup((prev) => ({
+        ...prev,
+        friends: updatedFriends,
+      }));
+
+      // Update expenseGroups state immediately
+      setExpenseGroups((prev) =>
+        prev.map((group) =>
+          group._id === currentGroupId
+            ? { ...group, friends: updatedFriends }
+            : group
+        )
+      );
+
+      // Then reload from server to ensure consistency
       await loadCurrentGroup();
     } catch (error) {
       toast({
@@ -275,12 +271,33 @@ export const ExpenseManager = () => {
 
     try {
       setLoading(true);
+
+      // Update local states immediately
+      setCurrentGroup((prev) => ({
+        ...prev,
+        friends: updatedFriends,
+      }));
+
+      // Update expenseGroups state immediately
+      setExpenseGroups((prev) =>
+        prev.map((group) =>
+          group._id === currentGroupId
+            ? { ...group, friends: updatedFriends }
+            : group
+        )
+      );
+
+      // Make API call
       await expenseGroupService.updateGroup(currentGroupId, {
         ...currentGroup,
         friends: updatedFriends,
       });
+
+      // Reload from server to ensure consistency
       await loadCurrentGroup();
     } catch (error) {
+      // If there's an error, revert the local changes
+      await loadCurrentGroup();
       toast({
         title: "Error",
         description: "Failed to add friend",
@@ -288,6 +305,47 @@ export const ExpenseManager = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Also update handleUpdateFriend to maintain consistency
+  const handleUpdateFriend = async (index, value) => {
+    if (!currentGroup) return;
+
+    const updatedFriends = [...currentGroup.friends];
+    updatedFriends[index] = value;
+
+    try {
+      // Update local states immediately
+      setCurrentGroup((prev) => ({
+        ...prev,
+        friends: updatedFriends,
+      }));
+
+      // Update expenseGroups state immediately
+      setExpenseGroups((prev) =>
+        prev.map((group) =>
+          group._id === currentGroupId
+            ? { ...group, friends: updatedFriends }
+            : group
+        )
+      );
+
+      await expenseGroupService.updateGroup(currentGroupId, {
+        ...currentGroup,
+        friends: updatedFriends.filter((friend) => friend.trim()),
+      });
+
+      // Reload from server to ensure consistency
+      await loadCurrentGroup();
+    } catch (error) {
+      // If there's an error, revert the local changes
+      await loadCurrentGroup();
+      toast({
+        title: "Error",
+        description: "Failed to update friend",
+        variant: "destructive",
+      });
     }
   };
 
