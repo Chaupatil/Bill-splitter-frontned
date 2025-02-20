@@ -9,10 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PersonalExpenseForm from "@/components/PersonalExpenseForm";
-import PersonalExpensesList from "@/components/PersonalExpensesList";
-import PersonalExpenseDashboard from "@/components/PersonalExpenseDashboard";
-import { CalendarDateRangePicker } from "@/components/CalendarDateRangePicker";
+import PersonalExpenseForm from "../components/PersonalExpenseForm";
+import PersonalExpensesList from "../components/PersonalExpensesList";
+import PersonalExpenseDashboard from "../components/PersonalExpenseDashboard";
+import { CalendarDateRangePicker } from "../components/CalendarDateRangePicker";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import {
@@ -179,12 +179,28 @@ const PersonalExpenses = () => {
   const handleDeleteExpense = async (id) => {
     try {
       await personalExpenseService.deletePersonalExpense(id);
+
+      // Fetch both expenses and summary data
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        startDate: dateRange.from?.toISOString(),
+        endDate: dateRange.to?.toISOString(),
+      };
+
+      // Fetch new data after deletion
+      const response = await personalExpenseService.getPersonalExpenses(params);
+      setExpenses(response.data);
+      setSummary(response.summary);
+      setPagination(response.pagination);
+
+      // Update stats for dashboard
+      await fetchStats();
+
       toast({
         title: "Success",
         description: "Expense deleted successfully",
       });
-      fetchExpenses();
-      fetchStats();
     } catch (error) {
       toast({
         title: "Error",
@@ -227,16 +243,21 @@ const PersonalExpenses = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h1 className="text-3xl font-bold">Personal Expenses</h1>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <CalendarDateRangePicker
-            date={dateRange}
-            setDate={handleDateRangeChange}
-          />
+      <div className="flex flex-col gap-4">
+        <h1 className="text-3xl font-bold text-center md:text-left">
+          Personal Expenses
+        </h1>
+        <div className="flex flex-col sm:flex-row justify-center md:justify-end items-center gap-4 w-full">
+          <div className="w-full sm:w-auto">
+            <CalendarDateRangePicker
+              date={dateRange}
+              setDate={handleDateRangeChange}
+              className="w-full sm:w-auto"
+            />
+          </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Expense
               </Button>

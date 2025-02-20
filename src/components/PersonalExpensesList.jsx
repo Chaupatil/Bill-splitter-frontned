@@ -66,29 +66,35 @@ const PersonalExpensesList = ({
   return (
     <>
       <div className="space-y-4">
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="min-w-[100px]">Date</TableHead>
+                <TableHead className="min-w-[100px]">Category</TableHead>
+                <TableHead className="min-w-[200px]">Description</TableHead>
+                <TableHead className="text-right min-w-[120px]">
+                  Amount
+                </TableHead>
+                <TableHead className="text-right min-w-[100px]">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {expenses.map((expense) => (
                 <TableRow key={expense._id}>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {format(new Date(expense.date), "dd MMM yyyy")}
                   </TableCell>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell className="max-w-xs truncate">
+                  <TableCell className="whitespace-nowrap">
+                    {expense.category}
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate">
                     {expense.description || "-"}
                   </TableCell>
                   <TableCell
-                    className={`text-right font-medium ${
+                    className={`text-right whitespace-nowrap font-medium ${
                       expense.type === "credit"
                         ? "text-green-600 dark:text-green-400"
                         : "text-red-600 dark:text-red-400"
@@ -97,7 +103,7 @@ const PersonalExpensesList = ({
                     {expense.type === "credit" ? "+" : "-"} ₹
                     {expense.amount.toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right whitespace-nowrap">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"

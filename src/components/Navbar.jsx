@@ -47,24 +47,32 @@ const Navbar = () => {
 
             {user ? (
               <>
-                <Link to="/expenses">
-                  <Button variant="ghost">Expenses</Button>
-                </Link>
-                <Link
-                  to="/personal-expenses"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Personal Expenses
-                </Link>
+                <div className="hidden md:flex space-x-4">
+                  <Link to="/expenses">
+                    <Button variant="ghost">Expenses</Button>
+                  </Link>
+                  <Link to="/personal-expenses">
+                    <Button variant="ghost">Personal Expenses</Button>
+                  </Link>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="relative">
                       <Menu className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Menu</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem className="md:hidden">
+                      <ReceiptText className="mr-2 h-4 w-4" />
+                      <Link to="/expenses">Expenses</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="md:hidden">
+                      <IndianRupee className="mr-2 h-4 w-4" />
+                      <Link to="/personal-expenses">Personal Expenses</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="md:hidden" />
                     <DropdownMenuItem>
                       <User className="mr-2 h-4 w-4" />
                       <span>{user.name}</span>
