@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Menu, User } from "lucide-react";
+import {
+  Menu,
+  User,
+  LogOut,
+  Home,
+  IndianRupee,
+  ReceiptText,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -43,6 +49,12 @@ const Navbar = () => {
               <>
                 <Link to="/expenses">
                   <Button variant="ghost">Expenses</Button>
+                </Link>
+                <Link
+                  to="/personal-expenses"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Personal Expenses
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

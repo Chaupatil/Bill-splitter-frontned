@@ -34,9 +34,11 @@ export const GroupManagement = ({
   deleteGroup,
   loading,
 }) => {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [dialogState, setDialogState] = useState({
+    isCreateOpen: false,
+    isEditOpen: false,
+    isDeleteOpen: false,
+  });
   const [groupFriends, setGroupFriends] = useState([""]);
   const [editGroupName, setEditGroupName] = useState("");
   const [editGroupFriends, setEditGroupFriends] = useState([]);
@@ -45,13 +47,50 @@ export const GroupManagement = ({
     (group) => group._id === currentGroupId
   );
 
+  // Helper functions
+  const showToast = (type, message) => {
+    toast({
+      title:
+        type === "error" ? "Error" : type === "warning" ? "Warning" : "Success",
+      description: message,
+      variant:
+        type === "error" || type === "warning" ? "destructive" : "default",
+    });
+  };
+
+  const openDialog = (dialogType) => {
+    const newState = {
+      isCreateOpen: false,
+      isEditOpen: false,
+      isDeleteOpen: false,
+    };
+
+    newState[dialogType] = true;
+    setDialogState(newState);
+
+    if (dialogType === "isEditOpen" && currentGroup) {
+      setEditGroupName(currentGroup.name);
+      setEditGroupFriends([...currentGroup.friends]);
+    }
+  };
+
+  const closeAllDialogs = () => {
+    setDialogState({
+      isCreateOpen: false,
+      isEditOpen: false,
+      isDeleteOpen: false,
+    });
+  };
+
+  const resetCreateForm = () => {
+    setGroupFriends([""]);
+    setNewGroupName("");
+  };
+
+  // Validation functions
   const validateGroupName = (name) => {
     if (!name.trim()) {
-      toast({
-        title: "Error",
-        description: "Group name cannot be empty",
-        variant: "destructive",
-      });
+      showToast("error", "Group name cannot be empty");
       return false;
     }
 
@@ -62,11 +101,7 @@ export const GroupManagement = ({
     );
 
     if (isDuplicate) {
-      toast({
-        title: "Error",
-        description: "A group with this name already exists",
-        variant: "destructive",
-      });
+      showToast("error", "A group with this name already exists");
       return false;
     }
 
@@ -77,11 +112,10 @@ export const GroupManagement = ({
     const validFriends = friends.filter((friend) => friend.trim());
 
     if (validFriends.length < MIN_FRIENDS) {
-      toast({
-        title: "Error",
-        description: `Please add at least ${MIN_FRIENDS} friends to create a group`,
-        variant: "destructive",
-      });
+      showToast(
+        "error",
+        `Please add at least ${MIN_FRIENDS} friends to create a group`
+      );
       return null;
     }
 
@@ -94,39 +128,55 @@ export const GroupManagement = ({
     );
 
     if (duplicates.length > 0) {
-      toast({
-        title: "Error",
-        description: "Duplicate friend names are not allowed",
-        variant: "destructive",
-      });
+      showToast("error", "Duplicate friend names are not allowed");
       return null;
     }
 
     return validFriends;
   };
 
-  const handleAddFriend = (friends, setFriends) => {
-    if (friends.length >= MAX_FRIENDS) {
-      toast({
-        title: "Limit Reached",
-        description: `Maximum ${MAX_FRIENDS} friends allowed per group`,
-        variant: "warning",
-      });
-      return;
-    }
+  // Friend list management
+  const handleFriendListChange = (
+    friendList,
+    setFriendList,
+    action,
+    index = null,
+    value = null
+  ) => {
+    switch (action) {
+      case "add":
+        if (friendList.length >= MAX_FRIENDS) {
+          showToast(
+            "warning",
+            `Maximum ${MAX_FRIENDS} friends allowed per group`
+          );
+          return;
+        }
 
-    if (friends.some((friend) => !friend.trim())) {
-      toast({
-        title: "Warning",
-        description: "Please fill in all existing friend names first",
-        variant: "warning",
-      });
-      return;
-    }
+        if (friendList.some((friend) => !friend.trim())) {
+          showToast(
+            "warning",
+            "Please fill in all existing friend names first"
+          );
+          return;
+        }
 
-    setFriends([...friends, ""]);
+        setFriendList([...friendList, ""]);
+        break;
+
+      case "update":
+        const updatedList = [...friendList];
+        updatedList[index] = value;
+        setFriendList(updatedList);
+        break;
+
+      case "remove":
+        setFriendList(friendList.filter((_, i) => i !== index));
+        break;
+    }
   };
 
+  // Action handlers
   const handleCreateGroup = () => {
     if (!validateGroupName(newGroupName)) return;
 
@@ -134,14 +184,9 @@ export const GroupManagement = ({
     if (!validFriends) return;
 
     createNewGroup(validFriends);
-    setIsCreateOpen(false);
-    setGroupFriends([""]);
-    setNewGroupName("");
-
-    toast({
-      title: "Success",
-      description: "Group created successfully",
-    });
+    closeAllDialogs();
+    resetCreateForm();
+    showToast("success", "Group created successfully");
   };
 
   const handleUpdateGroup = () => {
@@ -155,31 +200,52 @@ export const GroupManagement = ({
       friends: validFriends,
     });
 
-    setIsEditOpen(false);
-
-    toast({
-      title: "Success",
-      description: "Group updated successfully",
-    });
+    closeAllDialogs();
+    showToast("success", "Group updated successfully");
   };
 
   const handleDeleteGroup = () => {
     deleteGroup(currentGroupId);
-    setIsDeleteOpen(false);
-
-    toast({
-      title: "Success",
-      description: "Group deleted successfully",
-    });
+    closeAllDialogs();
+    showToast("success", "Group deleted successfully");
   };
 
-  const openEditDialog = () => {
-    if (currentGroup) {
-      setEditGroupName(currentGroup.name);
-      setEditGroupFriends([...currentGroup.friends]);
-      setIsEditOpen(true);
-    }
-  };
+  // UI Components
+  const FriendInputList = ({ friends, setFriends }) => (
+    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+      {friends.map((friend, index) => (
+        <div key={index} className="flex gap-2 group">
+          <Input
+            value={friend}
+            onChange={(e) =>
+              handleFriendListChange(
+                friends,
+                setFriends,
+                "update",
+                index,
+                e.target.value
+              )
+            }
+            placeholder="Friend's name"
+            className="flex-1"
+            maxLength={MAX_GROUP_NAME_LENGTH}
+          />
+          {friends.length > 1 && (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() =>
+                handleFriendListChange(friends, setFriends, "remove", index)
+              }
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -211,7 +277,7 @@ export const GroupManagement = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={openEditDialog}
+                    onClick={() => openDialog("isEditOpen")}
                     className="group"
                     title="Edit group"
                   >
@@ -222,7 +288,7 @@ export const GroupManagement = ({
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => setIsDeleteOpen(true)}
+                    onClick={() => openDialog("isDeleteOpen")}
                     className="group"
                     title="Delete group"
                   >
@@ -235,7 +301,7 @@ export const GroupManagement = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsCreateOpen(true)}
+                onClick={() => openDialog("isCreateOpen")}
                 className="group"
                 title="Create new group"
               >
@@ -245,7 +311,7 @@ export const GroupManagement = ({
             </div>
           </>
         ) : (
-          <Button onClick={() => setIsCreateOpen(true)}>
+          <Button onClick={() => openDialog("isCreateOpen")}>
             <Plus className="h-4 w-4 mr-2" />
             Create New Group
           </Button>
@@ -253,7 +319,10 @@ export const GroupManagement = ({
       </div>
 
       {/* Create Group Dialog */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      <Dialog
+        open={dialogState.isCreateOpen}
+        onOpenChange={(open) => !open && closeAllDialogs()}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Create New Expense Group</DialogTitle>
@@ -284,42 +353,18 @@ export const GroupManagement = ({
                   friends
                 </span>
               </div>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {groupFriends.map((friend, index) => (
-                  <div key={index} className="flex gap-2 group">
-                    <Input
-                      value={friend}
-                      onChange={(e) => {
-                        const updatedFriends = [...groupFriends];
-                        updatedFriends[index] = e.target.value;
-                        setGroupFriends(updatedFriends);
-                      }}
-                      placeholder="Friend's name"
-                      className="flex-1"
-                      maxLength={MAX_GROUP_NAME_LENGTH}
-                    />
-                    {groupFriends.length > 1 && (
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => {
-                          const updatedFriends = groupFriends.filter(
-                            (_, i) => i !== index
-                          );
-                          setGroupFriends(updatedFriends);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
+
+              <FriendInputList
+                friends={groupFriends}
+                setFriends={setGroupFriends}
+              />
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleAddFriend(groupFriends, setGroupFriends)}
+                onClick={() =>
+                  handleFriendListChange(groupFriends, setGroupFriends, "add")
+                }
                 className="mt-2"
                 disabled={groupFriends.length >= MAX_FRIENDS}
               >
@@ -333,9 +378,8 @@ export const GroupManagement = ({
             <Button
               variant="outline"
               onClick={() => {
-                setIsCreateOpen(false);
-                setGroupFriends([""]);
-                setNewGroupName("");
+                closeAllDialogs();
+                resetCreateForm();
               }}
             >
               Cancel
@@ -348,7 +392,10 @@ export const GroupManagement = ({
       </Dialog>
 
       {/* Edit Group Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+      <Dialog
+        open={dialogState.isEditOpen}
+        onOpenChange={(open) => !open && closeAllDialogs()}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Expense Group</DialogTitle>
@@ -379,43 +426,21 @@ export const GroupManagement = ({
                   {MAX_FRIENDS} friends
                 </span>
               </div>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {editGroupFriends.map((friend, index) => (
-                  <div key={index} className="flex gap-2 group">
-                    <Input
-                      value={friend}
-                      onChange={(e) => {
-                        const updatedFriends = [...editGroupFriends];
-                        updatedFriends[index] = e.target.value;
-                        setEditGroupFriends(updatedFriends);
-                      }}
-                      placeholder="Friend's name"
-                      className="flex-1"
-                      maxLength={MAX_GROUP_NAME_LENGTH}
-                    />
-                    {editGroupFriends.length > 1 && (
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => {
-                          const updatedFriends = editGroupFriends.filter(
-                            (_, i) => i !== index
-                          );
-                          setEditGroupFriends(updatedFriends);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
+
+              <FriendInputList
+                friends={editGroupFriends}
+                setFriends={setEditGroupFriends}
+              />
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  handleAddFriend(editGroupFriends, setEditGroupFriends)
+                  handleFriendListChange(
+                    editGroupFriends,
+                    setEditGroupFriends,
+                    "add"
+                  )
                 }
                 className="mt-2"
                 disabled={editGroupFriends.length >= MAX_FRIENDS}
@@ -427,7 +452,7 @@ export const GroupManagement = ({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+            <Button variant="outline" onClick={() => closeAllDialogs()}>
               Cancel
             </Button>
             <Button onClick={handleUpdateGroup} disabled={loading}>
@@ -438,7 +463,10 @@ export const GroupManagement = ({
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+      <Dialog
+        open={dialogState.isDeleteOpen}
+        onOpenChange={(open) => !open && closeAllDialogs()}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -453,7 +481,7 @@ export const GroupManagement = ({
           </DialogHeader>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
+            <Button variant="outline" onClick={() => closeAllDialogs()}>
               Cancel
             </Button>
             <Button

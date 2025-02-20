@@ -8,14 +8,14 @@ import { SettleUp } from "../components/SettleUp";
 import { expenseGroupService } from "../services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react"; // Import Loader2 icon from lucide-react
+import { Loader2 } from "lucide-react";
 
 export const ExpenseManager = () => {
   const [currentGroupId, setCurrentGroupId] = useState("");
   const [expenseGroups, setExpenseGroups] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(null);
-  const [loading, setLoading] = useState(true); // Set initial loading to true
-  const [dataLoading, setDataLoading] = useState(true); // Add dataLoading state for initial data fetch
+  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [settlements, setSettlements] = useState([]);
   const [summary, setSummary] = useState({
     totalExpenses: 0,
@@ -38,7 +38,7 @@ export const ExpenseManager = () => {
   // Load current group when selected
   useEffect(() => {
     if (currentGroupId) {
-      setDataLoading(true); // Set dataLoading true when loading new group
+      setDataLoading(true);
       Promise.all([loadCurrentGroup(), loadSettlements()])
         .then(() => setDataLoading(false))
         .catch(() => setDataLoading(false));
@@ -62,11 +62,7 @@ export const ExpenseManager = () => {
         setCurrentGroupId(groups[0]._id);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load expense groups",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to load expense groups");
     } finally {
       setLoading(false);
     }
@@ -78,11 +74,7 @@ export const ExpenseManager = () => {
       setCurrentGroup(group);
       return group;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load group details",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to load group details");
       return null;
     }
   };
@@ -90,20 +82,11 @@ export const ExpenseManager = () => {
   const loadSettlements = async () => {
     if (!currentGroupId) return;
 
-    // Retrieve the entire user object from localStorage
     const user = JSON.parse(localStorage.getItem("user"));
-
-    // Check if the user object and the token exist
     if (!user || !user.token) {
-      toast({
-        title: "Error",
-        description: "No token found, please log in again",
-        variant: "destructive",
-      });
+      showErrorToast("No token found, please log in again");
       return;
     }
-
-    const token = user.token;
 
     try {
       const response = await fetch(
@@ -111,7 +94,7 @@ export const ExpenseManager = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${user.token}`,
             "Content-Type": "application/json",
           },
         }
@@ -121,11 +104,7 @@ export const ExpenseManager = () => {
       setSettlements(data);
       return data;
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load settlements",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to load settlements");
       return [];
     }
   };
@@ -188,13 +167,46 @@ export const ExpenseManager = () => {
     });
   };
 
+  // Helper functions
+  const showErrorToast = (message) => {
+    toast({
+      title: "Error",
+      description: message,
+      variant: "destructive",
+    });
+  };
+
+  const showSuccessToast = (message) => {
+    toast({
+      title: "Success",
+      description: message,
+    });
+  };
+
+  const updateGroupInState = (groupId, updatedData) => {
+    // Update current group if it's the one being modified
+    if (groupId === currentGroupId) {
+      setCurrentGroup((prev) => ({
+        ...prev,
+        ...updatedData,
+      }));
+    }
+
+    // Update group in the groups list
+    setExpenseGroups((prev) =>
+      prev.map((group) =>
+        group._id === groupId ? { ...group, ...updatedData } : group
+      )
+    );
+  };
+
+  // CRUD operations
   const handleAddExpense = async (expenseData) => {
     setLoading(true);
     try {
       await expenseGroupService.addExpense(currentGroupId, {
         ...expenseData,
         amount: parseFloat(expenseData.amount),
-        // Ensure date is sent in ISO format if needed
         date:
           expenseData.date instanceof Date
             ? expenseData.date.toISOString()
@@ -203,17 +215,9 @@ export const ExpenseManager = () => {
 
       await loadCurrentGroup();
       await loadSettlements();
-
-      toast({
-        title: "Success",
-        description: "Expense added successfully",
-      });
+      showSuccessToast("Expense added successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add expense",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to add expense");
     } finally {
       setLoading(false);
     }
@@ -225,143 +229,52 @@ export const ExpenseManager = () => {
       await expenseGroupService.deleteExpense(currentGroupId, expenseId);
       await loadCurrentGroup();
       await loadSettlements();
-
-      toast({
-        title: "Success",
-        description: "Expense deleted successfully",
-      });
+      showSuccessToast("Expense deleted successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete expense",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to delete expense");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveFriend = async (index) => {
+  const handleFriendOperation = async (operation, index = null, value = "") => {
     if (!currentGroup) return;
     setLoading(true);
-    const updatedFriends = currentGroup.friends.filter((_, i) => i !== index);
 
-    try {
-      await expenseGroupService.updateGroup(currentGroupId, {
-        ...currentGroup,
-        friends: updatedFriends,
-      });
+    let updatedFriends;
 
-      // Update local currentGroup state immediately
-      setCurrentGroup((prev) => ({
-        ...prev,
-        friends: updatedFriends,
-      }));
-
-      // Update expenseGroups state immediately
-      setExpenseGroups((prev) =>
-        prev.map((group) =>
-          group._id === currentGroupId
-            ? { ...group, friends: updatedFriends }
-            : group
-        )
-      );
-
-      // Then reload from server to ensure consistency
-      await loadCurrentGroup();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove friend",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    switch (operation) {
+      case "add":
+        updatedFriends = [...currentGroup.friends, value];
+        break;
+      case "remove":
+        updatedFriends = currentGroup.friends.filter((_, i) => i !== index);
+        break;
+      case "update":
+        updatedFriends = [...currentGroup.friends];
+        updatedFriends[index] = value;
+        break;
+      default:
+        setLoading(false);
+        return;
     }
-  };
-
-  const handleAddFriend = async (name = "") => {
-    if (!currentGroup) return;
-
-    const updatedFriends = [...currentGroup.friends, name];
 
     try {
-      setLoading(true);
+      // Optimistic update
+      updateGroupInState(currentGroupId, { friends: updatedFriends });
 
-      // Update local states immediately
-      setCurrentGroup((prev) => ({
-        ...prev,
-        friends: updatedFriends,
-      }));
-
-      // Update expenseGroups state immediately
-      setExpenseGroups((prev) =>
-        prev.map((group) =>
-          group._id === currentGroupId
-            ? { ...group, friends: updatedFriends }
-            : group
-        )
-      );
-
-      // Make API call
-      await expenseGroupService.updateGroup(currentGroupId, {
-        ...currentGroup,
-        friends: updatedFriends,
-      });
-
-      // Reload from server to ensure consistency
-      await loadCurrentGroup();
-    } catch (error) {
-      // If there's an error, revert the local changes
-      await loadCurrentGroup();
-      toast({
-        title: "Error",
-        description: "Failed to add friend",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Also update handleUpdateFriend to maintain consistency
-  const handleUpdateFriend = async (index, value) => {
-    if (!currentGroup) return;
-    setLoading(true);
-    const updatedFriends = [...currentGroup.friends];
-    updatedFriends[index] = value;
-
-    try {
-      // Update local states immediately
-      setCurrentGroup((prev) => ({
-        ...prev,
-        friends: updatedFriends,
-      }));
-
-      // Update expenseGroups state immediately
-      setExpenseGroups((prev) =>
-        prev.map((group) =>
-          group._id === currentGroupId
-            ? { ...group, friends: updatedFriends }
-            : group
-        )
-      );
-
+      // Server update
       await expenseGroupService.updateGroup(currentGroupId, {
         ...currentGroup,
         friends: updatedFriends.filter((friend) => friend.trim()),
       });
 
-      // Reload from server to ensure consistency
+      // Ensure consistency
       await loadCurrentGroup();
     } catch (error) {
-      // If there's an error, revert the local changes
+      // Revert on error
       await loadCurrentGroup();
-      toast({
-        title: "Error",
-        description: "Failed to update friend",
-        variant: "destructive",
-      });
+      showErrorToast(`Failed to ${operation} friend`);
     } finally {
       setLoading(false);
     }
@@ -369,11 +282,7 @@ export const ExpenseManager = () => {
 
   const handleCreateGroup = async (friends) => {
     if (!newGroupName) {
-      toast({
-        title: "Error",
-        description: "Please enter a group name",
-        variant: "destructive",
-      });
+      showErrorToast("Please enter a group name");
       return;
     }
 
@@ -385,20 +294,11 @@ export const ExpenseManager = () => {
         expenses: [],
       });
 
-      // Reload groups and select the new one
       await loadExpenseGroups();
       setCurrentGroupId(newGroup._id);
-
-      toast({
-        title: "Success",
-        description: "Group created successfully",
-      });
+      showSuccessToast("Group created successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create group",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to create group");
     } finally {
       setLoading(false);
     }
@@ -413,21 +313,11 @@ export const ExpenseManager = () => {
         friends: groupData.friends,
       });
 
-      // Reload groups to reflect name changes in dropdown
       await loadExpenseGroups();
-      // Reload current group to update UI
       await loadCurrentGroup();
-
-      toast({
-        title: "Success",
-        description: "Group updated successfully",
-      });
+      showSuccessToast("Group updated successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update group",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to update group");
     } finally {
       setLoading(false);
     }
@@ -438,11 +328,9 @@ export const ExpenseManager = () => {
     try {
       await expenseGroupService.deleteGroup(groupId);
 
-      // Reload groups
       const updatedGroups = await expenseGroupService.getGroups();
       setExpenseGroups(updatedGroups);
 
-      // Set current group to the first available group or null
       if (updatedGroups.length > 0) {
         setCurrentGroupId(updatedGroups[0]._id);
       } else {
@@ -450,22 +338,15 @@ export const ExpenseManager = () => {
         setCurrentGroup(null);
       }
 
-      toast({
-        title: "Success",
-        description: "Group deleted successfully",
-      });
+      showSuccessToast("Group deleted successfully");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete group",
-        variant: "destructive",
-      });
+      showErrorToast("Failed to delete group");
     } finally {
       setLoading(false);
     }
   };
 
-  // Loading spinner component
+  // Simplified component for loading spinner
   const LoadingSpinner = () => (
     <div className="flex justify-center items-center py-8">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -527,9 +408,11 @@ export const ExpenseManager = () => {
             ) : (
               <FriendsList
                 friends={currentGroup.friends}
-                updateFriend={handleUpdateFriend}
-                removeFriend={handleRemoveFriend}
-                addFriend={handleAddFriend}
+                updateFriend={(index, value) =>
+                  handleFriendOperation("update", index, value)
+                }
+                removeFriend={(index) => handleFriendOperation("remove", index)}
+                addFriend={(name) => handleFriendOperation("add", null, name)}
                 loading={loading}
               />
             )}

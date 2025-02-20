@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import { ThemeProvider } from "./context/ThemeProvider";
+import PersonalExpenses from "./pages/PersonalExpenses"; // Import the personal expenses page
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -39,6 +40,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <ExpenseManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/personal-expenses"
+              element={
+                <ProtectedRoute>
+                  <PersonalExpenses />
                 </ProtectedRoute>
               }
             />
