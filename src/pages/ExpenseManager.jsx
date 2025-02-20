@@ -8,12 +8,14 @@ import { SettleUp } from "../components/SettleUp";
 import { expenseGroupService } from "../services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react"; // Import Loader2 icon from lucide-react
 
 export const ExpenseManager = () => {
   const [currentGroupId, setCurrentGroupId] = useState("");
   const [expenseGroups, setExpenseGroups] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Set initial loading to true
+  const [dataLoading, setDataLoading] = useState(true); // Add dataLoading state for initial data fetch
   const [settlements, setSettlements] = useState([]);
   const [summary, setSummary] = useState({
     totalExpenses: 0,
@@ -36,8 +38,10 @@ export const ExpenseManager = () => {
   // Load current group when selected
   useEffect(() => {
     if (currentGroupId) {
-      loadCurrentGroup();
-      loadSettlements();
+      setDataLoading(true); // Set dataLoading true when loading new group
+      Promise.all([loadCurrentGroup(), loadSettlements()])
+        .then(() => setDataLoading(false))
+        .catch(() => setDataLoading(false));
     }
   }, [currentGroupId]);
 
@@ -49,6 +53,7 @@ export const ExpenseManager = () => {
   }, [currentGroup]);
 
   const loadExpenseGroups = async () => {
+    setLoading(true);
     try {
       const groups = await expenseGroupService.getGroups();
       setExpenseGroups(groups);
@@ -62,6 +67,8 @@ export const ExpenseManager = () => {
         description: "Failed to load expense groups",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,12 +76,14 @@ export const ExpenseManager = () => {
     try {
       const group = await expenseGroupService.getGroup(currentGroupId);
       setCurrentGroup(group);
+      return group;
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to load group details",
         variant: "destructive",
       });
+      return null;
     }
   };
 
@@ -110,12 +119,14 @@ export const ExpenseManager = () => {
       if (!response.ok) throw new Error("Failed to fetch settlements");
       const data = await response.json();
       setSettlements(data);
+      return data;
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to load settlements",
         variant: "destructive",
       });
+      return [];
     }
   };
 
@@ -209,6 +220,7 @@ export const ExpenseManager = () => {
   };
 
   const handleDeleteExpense = async (expenseId) => {
+    setLoading(true);
     try {
       await expenseGroupService.deleteExpense(currentGroupId, expenseId);
       await loadCurrentGroup();
@@ -224,12 +236,14 @@ export const ExpenseManager = () => {
         description: "Failed to delete expense",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRemoveFriend = async (index) => {
     if (!currentGroup) return;
-
+    setLoading(true);
     const updatedFriends = currentGroup.friends.filter((_, i) => i !== index);
 
     try {
@@ -261,6 +275,8 @@ export const ExpenseManager = () => {
         description: "Failed to remove friend",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -311,7 +327,7 @@ export const ExpenseManager = () => {
   // Also update handleUpdateFriend to maintain consistency
   const handleUpdateFriend = async (index, value) => {
     if (!currentGroup) return;
-
+    setLoading(true);
     const updatedFriends = [...currentGroup.friends];
     updatedFriends[index] = value;
 
@@ -346,6 +362,8 @@ export const ExpenseManager = () => {
         description: "Failed to update friend",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -447,6 +465,13 @@ export const ExpenseManager = () => {
     }
   };
 
+  // Loading spinner component
+  const LoadingSpinner = () => (
+    <div className="flex justify-center items-center py-8">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+
   return (
     <div className="container mx-auto p-4 space-y-8">
       <GroupManagement
@@ -460,6 +485,8 @@ export const ExpenseManager = () => {
         deleteGroup={handleDeleteGroup}
         loading={loading}
       />
+
+      {loading && !currentGroup && <LoadingSpinner />}
 
       {currentGroup && (
         <Tabs defaultValue="expenses" className="space-y-6">
@@ -476,33 +503,49 @@ export const ExpenseManager = () => {
               onAddExpense={handleAddExpense}
               loading={loading}
             />
-            <ExpensesList
-              expenses={currentGroup.expenses}
-              onDeleteExpense={handleDeleteExpense}
-            />
+            {dataLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <ExpensesList
+                expenses={currentGroup.expenses}
+                onDeleteExpense={handleDeleteExpense}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="summary">
-            <Summary summary={summary} friends={currentGroup.friends} />
+            {dataLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <Summary summary={summary} friends={currentGroup.friends} />
+            )}
           </TabsContent>
 
           <TabsContent value="friends">
-            <FriendsList
-              friends={currentGroup.friends}
-              updateFriend={handleUpdateFriend}
-              removeFriend={handleRemoveFriend}
-              addFriend={handleAddFriend}
-              loading={loading}
-            />
+            {dataLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <FriendsList
+                friends={currentGroup.friends}
+                updateFriend={handleUpdateFriend}
+                removeFriend={handleRemoveFriend}
+                addFriend={handleAddFriend}
+                loading={loading}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="settlements">
-            <SettleUp
-              groupId={currentGroupId}
-              settlements={settlements}
-              onSettlementsUpdated={loadSettlements}
-              summary={summary}
-            />
+            {dataLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <SettleUp
+                groupId={currentGroupId}
+                settlements={settlements}
+                onSettlementsUpdated={loadSettlements}
+                summary={summary}
+              />
+            )}
           </TabsContent>
         </Tabs>
       )}
