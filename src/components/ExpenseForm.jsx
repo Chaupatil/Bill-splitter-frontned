@@ -463,40 +463,54 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                           <Tabs
                             defaultValue={field.value}
                             onValueChange={field.onChange}
-                            className="w-full"
+                            className="w-full mt-2"
                           >
-                            <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-2">
-                              {["equal", "exact", "percentage", "adjust"].map(
-                                (type) => (
-                                  <TabsTrigger
-                                    key={type}
-                                    value={type}
-                                    className="flex items-center gap-2"
-                                  >
-                                    {getSplitTypeIcon(type)}
-                                    <span className="hidden md:inline">
-                                      {getSplitTypeLabel(type)}
-                                    </span>
-                                    <span className="md:hidden">
-                                      {type.charAt(0).toUpperCase()}
-                                    </span>
-                                  </TabsTrigger>
-                                )
-                              )}
+                            <TabsList className="h-full grid grid-cols-4 mb-2">
+                              {[
+                                {
+                                  type: "equal",
+                                  label: "Equal",
+                                  icon: <Users className="w-4 h-4" />,
+                                },
+                                {
+                                  type: "exact",
+                                  label: "Exact",
+                                  icon: <IndianRupee className="w-4 h-4" />,
+                                },
+                                {
+                                  type: "percentage",
+                                  label: "Percent",
+                                  icon: <Percent className="w-4 h-4" />,
+                                },
+                                {
+                                  type: "adjust",
+                                  label: "Adjust",
+                                  icon: <Calculator className="w-4 h-4" />,
+                                },
+                              ].map(({ type, label, icon }) => (
+                                <TabsTrigger
+                                  key={type}
+                                  value={type}
+                                  className="flex flex-col items-center gap-1 py-2 px-1 sm:flex-row sm:gap-2"
+                                >
+                                  {icon}
+                                  <span className="text-xs sm:text-sm">
+                                    {label}
+                                  </span>
+                                </TabsTrigger>
+                              ))}
                             </TabsList>
 
-                            {/* Tab content description */}
-                            <div className="text-sm text-slate-500 dark:text-slate-400 mb-6 mt-2">
-                              <p className="italic">
-                                {watchSplitType === "equal" &&
-                                  "Split expense equally between all participants"}
-                                {watchSplitType === "exact" &&
-                                  "Specify exact amount each person pays"}
-                                {watchSplitType === "percentage" &&
-                                  "Split by percentage (must total 100%)"}
-                                {watchSplitType === "adjust" &&
-                                  "Equal split with individual adjustments"}
-                              </p>
+                            {/* Tab content description in a fixed height container */}
+                            <div className="min-h-[48px] text-sm text-slate-500 dark:text-slate-400 mb-4 mt-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded">
+                              {watchSplitType === "equal" &&
+                                "Split expense equally between all participants"}
+                              {watchSplitType === "exact" &&
+                                "Specify exact amount each person pays"}
+                              {watchSplitType === "percentage" &&
+                                "Split by percentage (total must be 100%)"}
+                              {watchSplitType === "adjust" &&
+                                "Equal split with individual adjustments"}
                             </div>
                           </Tabs>
                         </FormControl>
