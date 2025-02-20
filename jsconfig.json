@@ -3,6 +3,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": [
+      "babel__core",
+      "babel__generator",
+      "babel__template",
+      "babel__traverse",
+      "estree",
+      "node",
+      "react",
+      "react-dom"
+    ]
   }
 }
