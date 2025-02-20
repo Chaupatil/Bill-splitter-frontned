@@ -46,30 +46,16 @@ const formSchema = z.object({
 
 // Predefined categories
 const expenseCategories = [
-  // Income categories
   "Salary",
-  "Bonus",
-  "Investment",
-  "Gift",
-  "Refund",
-  "Other Income",
-  // Expense categories
   "Food",
   "Groceries",
   "Transportation",
-  "Housing",
   "Utilities",
   "Entertainment",
   "Shopping",
   "Healthcare",
-  "Education",
   "Travel",
   "Personal Care",
-  "Investments",
-  "Gifts",
-  "Insurance",
-  "Taxes",
-  "Debt Payment",
   "Miscellaneous",
 ];
 
