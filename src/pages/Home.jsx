@@ -28,25 +28,6 @@ export const Home = () => {
         <div className="grid grid-cols-1 gap-4">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Group Expenses</CardTitle>
-              <CardDescription>
-                Create a new expense group or manage existing ones
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => navigate("/expenses")}
-              >
-                Go to Expense Manager
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
               <CardTitle>Personal Finance</CardTitle>
               <CardDescription>
                 Track your personal income and expenses
@@ -59,6 +40,25 @@ export const Home = () => {
                 onClick={() => navigate("/personal-expenses")}
               >
                 Go to Personal Expenses
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle>Group Expenses</CardTitle>
+              <CardDescription>
+                Create a new expense group or manage existing ones
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={() => navigate("/expenses")}
+              >
+                Go to Group Expenses
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </CardContent>
