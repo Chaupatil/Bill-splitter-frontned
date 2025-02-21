@@ -44,3 +44,7 @@ pnpm-lock.yaml
 
 # Build artifacts created by Vite (especially if using SSR)
 .vite/
+
+android/
+capacitor.config.json
+ionic.config.json

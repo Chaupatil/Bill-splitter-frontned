@@ -8,7 +8,7 @@ import { SettleUp } from "../components/SettleUp";
 import { expenseGroupService } from "../services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export const ExpenseManager = () => {
   const [currentGroupId, setCurrentGroupId] = useState("");
@@ -346,92 +346,95 @@ export const ExpenseManager = () => {
     }
   };
 
-  // Simplified component for loading spinner
-  const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
-
   return (
-    <div className="container mx-auto p-4 space-y-8">
-      <GroupManagement
-        currentGroupId={currentGroupId}
-        expenseGroups={expenseGroups}
-        newGroupName={newGroupName}
-        setNewGroupName={setNewGroupName}
-        onGroupChange={setCurrentGroupId}
-        createNewGroup={handleCreateGroup}
-        updateGroup={handleUpdateGroup}
-        deleteGroup={handleDeleteGroup}
-        loading={loading}
-      />
+    <>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="container mx-auto p-4 space-y-8">
+          <GroupManagement
+            currentGroupId={currentGroupId}
+            expenseGroups={expenseGroups}
+            newGroupName={newGroupName}
+            setNewGroupName={setNewGroupName}
+            onGroupChange={setCurrentGroupId}
+            createNewGroup={handleCreateGroup}
+            updateGroup={handleUpdateGroup}
+            deleteGroup={handleDeleteGroup}
+            loading={loading}
+          />
 
-      {loading && !currentGroup && <LoadingSpinner />}
+          {loading && !currentGroup && <LoadingSpinner />}
 
-      {currentGroup && (
-        <Tabs defaultValue="expenses" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="friends">Friends</TabsTrigger>
-            <TabsTrigger value="settlements">Settlements</TabsTrigger>
-          </TabsList>
+          {currentGroup && (
+            <Tabs defaultValue="expenses" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="expenses">Expenses</TabsTrigger>
+                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="friends">Friends</TabsTrigger>
+                <TabsTrigger value="settlements">Settlements</TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="expenses" className="space-y-6">
-            <ExpenseForm
-              friends={currentGroup.friends}
-              onAddExpense={handleAddExpense}
-              loading={loading}
-            />
-            {dataLoading ? (
-              <LoadingSpinner />
-            ) : (
-              <ExpensesList
-                expenses={currentGroup.expenses}
-                onDeleteExpense={handleDeleteExpense}
-              />
-            )}
-          </TabsContent>
+              <TabsContent value="expenses" className="space-y-6">
+                <ExpenseForm
+                  friends={currentGroup.friends}
+                  onAddExpense={handleAddExpense}
+                  loading={loading}
+                />
+                {dataLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <ExpensesList
+                    expenses={currentGroup.expenses}
+                    onDeleteExpense={handleDeleteExpense}
+                  />
+                )}
+              </TabsContent>
 
-          <TabsContent value="summary">
-            {dataLoading ? (
-              <LoadingSpinner />
-            ) : (
-              <Summary summary={summary} friends={currentGroup.friends} />
-            )}
-          </TabsContent>
+              <TabsContent value="summary">
+                {dataLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <Summary summary={summary} friends={currentGroup.friends} />
+                )}
+              </TabsContent>
 
-          <TabsContent value="friends">
-            {dataLoading ? (
-              <LoadingSpinner />
-            ) : (
-              <FriendsList
-                friends={currentGroup.friends}
-                updateFriend={(index, value) =>
-                  handleFriendOperation("update", index, value)
-                }
-                removeFriend={(index) => handleFriendOperation("remove", index)}
-                addFriend={(name) => handleFriendOperation("add", null, name)}
-                loading={loading}
-              />
-            )}
-          </TabsContent>
+              <TabsContent value="friends">
+                {dataLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <FriendsList
+                    friends={currentGroup.friends}
+                    updateFriend={(index, value) =>
+                      handleFriendOperation("update", index, value)
+                    }
+                    removeFriend={(index) =>
+                      handleFriendOperation("remove", index)
+                    }
+                    addFriend={(name) =>
+                      handleFriendOperation("add", null, name)
+                    }
+                    loading={loading}
+                  />
+                )}
+              </TabsContent>
 
-          <TabsContent value="settlements">
-            {dataLoading ? (
-              <LoadingSpinner />
-            ) : (
-              <SettleUp
-                groupId={currentGroupId}
-                settlements={settlements}
-                onSettlementsUpdated={loadSettlements}
-                summary={summary}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="settlements">
+                {dataLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <SettleUp
+                    groupId={currentGroupId}
+                    settlements={settlements}
+                    onSettlementsUpdated={loadSettlements}
+                    summary={summary}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };

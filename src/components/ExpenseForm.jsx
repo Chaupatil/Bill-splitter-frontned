@@ -590,7 +590,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                           <div className="bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200 p-4 rounded-md flex items-center justify-between">
                             <span>Each person pays:</span>
                             <span className="font-medium text-lg">
-                              $
+                              ₹
                               {(
                                 parseFloat(watchAmount) /
                                 participatingFriends.filter(
@@ -650,7 +650,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                                 <p className="flex items-center justify-between">
                                   <span>Current total:</span>
                                   <span className="font-medium">
-                                    $
+                                    ₹
                                     {participatingFriends
                                       .filter((f) => f.participating)
                                       .reduce(
@@ -741,7 +741,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                               Base amount per person:
                             </span>
                             <span className="font-medium text-blue-800 dark:text-blue-200">
-                              $
+                              ₹
                               {(
                                 parseFloat(watchAmount) /
                                 participatingFriends.filter(
