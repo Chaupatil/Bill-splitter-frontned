@@ -89,7 +89,7 @@ const Register = () => {
       localStorage.setItem("user", JSON.stringify(data));
       toast({
         title: "Registration successful",
-        description: "Welcome to Bill Splitter!",
+        description: "Welcome to Expense Manager!",
       });
       navigate("/expenses");
     } catch (error) {

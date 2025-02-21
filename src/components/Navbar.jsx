@@ -39,7 +39,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <Home className="h-6 w-6" />
-            <span className="font-bold">Bill Splitter</span>
+            <span className="font-bold">Expense Manager</span>
           </Link>
 
           <div className="flex items-center space-x-4">
@@ -48,11 +48,11 @@ const Navbar = () => {
             {user ? (
               <>
                 <div className="hidden md:flex space-x-4">
-                  <Link to="/expenses">
-                    <Button variant="ghost">Expenses</Button>
-                  </Link>
                   <Link to="/personal-expenses">
                     <Button variant="ghost">Personal Expenses</Button>
+                  </Link>
+                  <Link to="/expenses">
+                    <Button variant="ghost">Group Expenses</Button>
                   </Link>
                 </div>
                 <DropdownMenu>
@@ -66,7 +66,7 @@ const Navbar = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="md:hidden">
                       <ReceiptText className="mr-2 h-4 w-4" />
-                      <Link to="/expenses">Expenses</Link>
+                      <Link to="/expenses">Group Expenses</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="md:hidden">
                       <IndianRupee className="mr-2 h-4 w-4" />
