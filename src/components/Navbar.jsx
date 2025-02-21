@@ -74,9 +74,15 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="md:hidden" />
                     <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>{user.name}</span>
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-2 w-full"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        <span>{user.name}</span>
+                      </Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>

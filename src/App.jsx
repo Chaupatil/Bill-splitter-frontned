@@ -13,6 +13,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import { ThemeProvider } from "./context/ThemeProvider";
 import PersonalExpenses from "./pages/PersonalExpenses"; // Import the personal expenses page
+import Profile from "./pages/Profile";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -35,6 +36,14 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/expenses"
               element={
