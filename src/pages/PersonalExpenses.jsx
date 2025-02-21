@@ -19,25 +19,28 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import cn from "classnames";
 
 export const LoadingSpinner = ({ className }) => {
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={cn("animate-spin", className)}
-  >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>;
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("animate-spin", className)}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
 };
 
 const PersonalExpenses = () => {
@@ -52,10 +55,20 @@ const PersonalExpenses = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [dateRange, setDateRange] = useState({
-    from: new Date(new Date().setHours(0, 0, 0, 0)), // Start of today
-    to: new Date(new Date().setHours(23, 59, 59, 999)), // End of today
+  const [dateRange, setDateRange] = useState(() => {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Set time to the beginning of the first day and the current time for 'today'
+    firstDayOfMonth.setHours(0, 0, 0, 0);
+    today.setHours(23, 59, 59, 999);
+
+    return {
+      from: firstDayOfMonth,
+      to: today,
+    };
   });
+
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 25,
@@ -266,6 +279,10 @@ const PersonalExpenses = () => {
               <DialogTitle>
                 {editingExpense ? "Edit Expense" : "Add New Expense"}
               </DialogTitle>
+              <DialogDescription>
+                Fill out the form below to{" "}
+                {editingExpense ? "update the" : "add a new"} expense.
+              </DialogDescription>
               <PersonalExpenseForm
                 onSubmit={
                   editingExpense

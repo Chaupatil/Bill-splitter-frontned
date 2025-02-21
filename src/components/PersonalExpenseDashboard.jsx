@@ -13,24 +13,32 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { format, parse } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 
 const PersonalExpenseDashboard = ({ stats, dateRange }) => {
   if (!stats || !stats.monthlyData || !stats.categoryDistribution) {
     return <div>No data available for the selected period.</div>;
   }
 
-  // Format monthly data for visualization
+  // In PersonalExpenseDashboard.jsx
   const monthlyChartData = stats.monthlyData.map((item) => {
-    const date = parse(item.month, "yyyy-MM", new Date());
+    // Make sure we're using the correct date format parsing
+    // The item.month is expected to be in "YYYY-MM" format
+    const [year, month] = item.month.split("-").map(Number);
+
+    // Create a date object manually to avoid timezone issues
+    // Use the 15th day of month to avoid any end-of-month/start-of-month timezone issues
+    const date = new Date(year, month - 1, 15);
+
     return {
       name: format(date, "MMM yyyy"),
       credit: parseFloat(item.credit.toFixed(2)),
       debit: parseFloat(item.debit.toFixed(2)),
       balance: parseFloat(item.balance.toFixed(2)),
+      // Store raw month data for debugging if needed
+      rawMonth: item.month,
     };
   });
-
   // Prepare category distribution data for pie chart
   const totalDebitAmount = stats.categoryDistribution.reduce(
     (sum, item) => sum + item.total,

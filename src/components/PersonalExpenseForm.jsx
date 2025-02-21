@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -60,6 +60,8 @@ const expenseCategories = [
 ];
 
 const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   // Initialize form with existing data or defaults
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -76,6 +78,12 @@ const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
           date: new Date(),
         },
   });
+
+  // Handler for date selection
+  const handleDateSelect = (date, field) => {
+    field.onChange(date);
+    setIsCalendarOpen(false);
+  };
 
   return (
     <Form {...form}>
@@ -174,7 +182,7 @@ const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Date</FormLabel>
-              <Popover>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -196,7 +204,7 @@ const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => handleDateSelect(date, field)}
                     disabled={(date) =>
                       date > new Date() || date < new Date("1900-01-01")
                     }
