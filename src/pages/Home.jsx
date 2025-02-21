@@ -71,7 +71,7 @@ export const Home = () => {
               <IndianRupee className="h-8 w-8 text-primary" />
               <CardTitle>Track Expenses</CardTitle>
               <CardDescription>
-                Add and manage expenses within your groups
+                Effortlessly track all your group expenses and monitor balances.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -81,7 +81,8 @@ export const Home = () => {
               <Users className="h-8 w-8 text-primary" />
               <CardTitle>Manage Groups</CardTitle>
               <CardDescription>
-                Create groups and add friends to split expenses
+                Create and organize expense groups, and invite friends to
+                contribute.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -91,7 +92,8 @@ export const Home = () => {
               <ReceiptText className="h-8 w-8 text-primary" />
               <CardTitle>Personal Finance</CardTitle>
               <CardDescription>
-                Track your personal income and expenses
+                Keep a detailed record of your personal expenses and income
+                sources.
               </CardDescription>
             </CardHeader>
           </Card>
