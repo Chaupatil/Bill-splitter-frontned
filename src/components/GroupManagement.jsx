@@ -211,41 +211,58 @@ export const GroupManagement = ({
   };
 
   // UI Components
-  const FriendInputList = ({ friends, setFriends }) => (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto">
-      {friends.map((friend, index) => (
-        <div key={index} className="flex gap-2 group">
-          <Input
-            value={friend}
-            onChange={(e) =>
-              handleFriendListChange(
-                friends,
-                setFriends,
-                "update",
-                index,
-                e.target.value
-              )
-            }
-            placeholder="Friend's name"
-            className="flex-1"
-            maxLength={MAX_GROUP_NAME_LENGTH}
-          />
-          {friends.length > 1 && (
-            <Button
-              variant="destructive"
-              size="icon"
-              onClick={() =>
-                handleFriendListChange(friends, setFriends, "remove", index)
-              }
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  const FriendInputList = ({ friends, setFriends }) => {
+    // Local state to track input values
+    const [inputValues, setInputValues] = React.useState([...friends]);
+
+    // Update local state when props change (e.g., when resetting the form)
+    React.useEffect(() => {
+      setInputValues([...friends]);
+    }, [friends]);
+
+    // Update parent state only when input loses focus (not on every keystroke)
+    const handleBlur = () => {
+      setFriends([...inputValues]);
+    };
+
+    // Update local state without triggering parent rerenders
+    const handleChange = (index, value) => {
+      const newValues = [...inputValues];
+      newValues[index] = value;
+      setInputValues(newValues);
+    };
+
+    return (
+      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+        {inputValues.map((value, index) => (
+          <div key={`friend-input-${index}`} className="flex gap-2 group">
+            <Input
+              value={value}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onBlur={handleBlur}
+              placeholder="Friend's name"
+              className="flex-1"
+              maxLength={MAX_GROUP_NAME_LENGTH}
+            />
+            {inputValues.length > 1 && (
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => {
+                  const newValues = inputValues.filter((_, i) => i !== index);
+                  setInputValues(newValues);
+                  setFriends(newValues);
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
