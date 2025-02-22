@@ -265,12 +265,12 @@ export const GroupManagement = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4 items-center">
+    <div className="space-y-4 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full">
         {expenseGroups.length > 0 ? (
           <>
             <Select value={currentGroupId} onValueChange={onGroupChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Select group" />
               </SelectTrigger>
               <SelectContent>
@@ -288,14 +288,14 @@ export const GroupManagement = ({
               </SelectContent>
             </Select>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               {currentGroupId && (
                 <>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => openDialog("isEditOpen")}
-                    className="group"
+                    className="group flex-1 sm:flex-none"
                     title="Edit group"
                   >
                     <Edit className="h-4 w-4 mr-1 group-hover:text-primary" />
@@ -306,7 +306,7 @@ export const GroupManagement = ({
                     variant="destructive"
                     size="sm"
                     onClick={() => openDialog("isDeleteOpen")}
-                    className="group"
+                    className="group flex-1 sm:flex-none"
                     title="Delete group"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
@@ -319,7 +319,7 @@ export const GroupManagement = ({
                 variant="outline"
                 size="sm"
                 onClick={() => openDialog("isCreateOpen")}
-                className="group"
+                className="group flex-1 sm:flex-none"
                 title="Create new group"
               >
                 <Plus className="h-4 w-4 mr-1 group-hover:text-primary" />
@@ -328,7 +328,10 @@ export const GroupManagement = ({
             </div>
           </>
         ) : (
-          <Button onClick={() => openDialog("isCreateOpen")}>
+          <Button
+            onClick={() => openDialog("isCreateOpen")}
+            className="w-full sm:w-auto"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Create New Group
           </Button>

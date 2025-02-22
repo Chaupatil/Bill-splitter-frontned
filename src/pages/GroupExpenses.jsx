@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-export const ExpenseManager = () => {
+export const GroupExpenses = () => {
   const [currentGroupId, setCurrentGroupId] = useState("");
   const [expenseGroups, setExpenseGroups] = useState([]);
   const [currentGroup, setCurrentGroup] = useState(null);

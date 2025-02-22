@@ -59,8 +59,13 @@ const expenseCategories = [
   "Miscellaneous",
 ];
 
-const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
+const PersonalExpenseForm = ({
+  onSubmit,
+  initialData = null,
+  isLoading = false,
+}) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with existing data or defaults
   const form = useForm({
@@ -78,6 +83,15 @@ const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
           date: new Date(),
         },
   });
+
+  const handleSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Handler for date selection
   const handleDateSelect = (date, field) => {
@@ -217,8 +231,20 @@ const PersonalExpenseForm = ({ onSubmit, initialData = null }) => {
           )}
         />
 
-        <Button type="submit" className="w-full">
-          {initialData ? "Update Expense" : "Add Expense"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting || isLoading}
+        >
+          {isSubmitting || isLoading ? (
+            <div className="flex items-center justify-center">
+              {initialData ? "Updating..." : "Adding..."}
+            </div>
+          ) : initialData ? (
+            "Update Expense"
+          ) : (
+            "Add Expense"
+          )}
         </Button>
       </form>
     </Form>

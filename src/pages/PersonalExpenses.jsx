@@ -36,6 +36,8 @@ const PersonalExpenses = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -130,6 +132,7 @@ const PersonalExpenses = () => {
 
   // Handle adding a new expense
   const handleAddExpense = async (formData) => {
+    setIsSubmitting(true);
     try {
       await personalExpenseService.addPersonalExpense(formData);
       setDialogOpen(false);
@@ -145,11 +148,14 @@ const PersonalExpenses = () => {
         description: error.message || "Failed to add expense",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle updating an expense
   const handleUpdateExpense = async (id, formData) => {
+    setIsSubmitting(true);
     try {
       await personalExpenseService.updatePersonalExpense(id, formData);
       setDialogOpen(false);
@@ -166,11 +172,14 @@ const PersonalExpenses = () => {
         description: error.message || "Failed to update expense",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle deleting an expense
   const handleDeleteExpense = async (id) => {
+    setIsDeleting(true);
     try {
       await personalExpenseService.deletePersonalExpense(id);
 
@@ -201,6 +210,8 @@ const PersonalExpenses = () => {
         description: error.message || "Failed to delete expense",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -276,6 +287,7 @@ const PersonalExpenses = () => {
                         : handleAddExpense
                     }
                     initialData={editingExpense}
+                    isLoading={isSubmitting}
                   />
                 </DialogContent>
               </Dialog>
@@ -351,6 +363,7 @@ const PersonalExpenses = () => {
                   onPageChange={handlePageChange}
                   onEdit={openEditDialog}
                   onDelete={handleDeleteExpense}
+                  isLoading={loading}
                 />
               )}
             </TabsContent>

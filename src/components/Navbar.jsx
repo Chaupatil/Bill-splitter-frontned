@@ -24,13 +24,20 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const user = JSON.parse(localStorage.getItem("user"));
+  const [open, setOpen] = React.useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     toast({
       title: "Logged out successfully",
     });
+    setOpen(false);
     navigate("/login");
+  };
+
+  const handleNavigation = (path) => {
+    setOpen(false);
+    navigate(path);
   };
 
   return (
@@ -55,7 +62,7 @@ const Navbar = () => {
                     <Button variant="ghost">Group Expenses</Button>
                   </Link>
                 </div>
-                <DropdownMenu>
+                <DropdownMenu open={open} onOpenChange={setOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                       <Menu className="h-5 w-5" />
@@ -64,25 +71,27 @@ const Navbar = () => {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>Menu</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="md:hidden">
-                      <ReceiptText className="mr-2 h-4 w-4" />
-                      <Link to="/expenses">Group Expenses</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="md:hidden">
+                    <DropdownMenuItem
+                      className="md:hidden"
+                      onClick={() => handleNavigation("/personal-expenses")}
+                    >
                       <IndianRupee className="mr-2 h-4 w-4" />
-                      <Link to="/personal-expenses">Personal Expenses</Link>
+                      <span>Personal Expenses</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="md:hidden"
+                      onClick={() => handleNavigation("/expenses")}
+                    >
+                      <ReceiptText className="mr-2 h-4 w-4" />
+                      <span>Group Expenses</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="md:hidden" />
-                    <DropdownMenuItem>
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-2 w-full"
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        <span>{user.name}</span>
-                      </Link>
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/profile")}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>{user.name}</span>
                     </DropdownMenuItem>
-
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>

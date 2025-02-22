@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Home } from "./pages/Home";
-import { ExpenseManager } from "./pages/ExpenseManager";
+import { GroupExpenses } from "./pages/GroupExpenses";
 import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
@@ -48,7 +48,7 @@ const App = () => {
               path="/expenses"
               element={
                 <ProtectedRoute>
-                  <ExpenseManager />
+                  <GroupExpenses />
                 </ProtectedRoute>
               }
             />

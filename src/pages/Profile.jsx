@@ -106,6 +106,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [initialData, setInitialData] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -135,9 +136,17 @@ const Profile = () => {
         });
         const data = await response.json();
 
+        setInitialData({
+          name: data.name,
+          email: data.email,
+        });
+
         form.reset({
           name: data.name,
           email: data.email,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
         });
       } catch (error) {
         toast({
@@ -153,7 +162,49 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
   const onSubmit = async (values) => {
+    // Check if there are any changes
+    const hasNameChanged = values.name !== initialData.name;
+    const hasEmailChanged = values.email !== initialData.email;
+    const hasPasswordChange = Boolean(
+      values.newPassword && values.currentPassword
+    );
+
+    if (!hasNameChanged && !hasEmailChanged && !hasPasswordChange) {
+      toast({
+        title: "No Changes",
+        description: "No changes were made to save",
+      });
+      return;
+    }
+
+    // If only password fields are partially filled, don't proceed
+    if (
+      (values.currentPassword && !values.newPassword) ||
+      (!values.currentPassword && values.newPassword)
+    ) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete Password Change",
+        description: "Please fill all password fields to change password",
+      });
+      return;
+    }
+
+    // Prepare the data to send
+    const dataToUpdate = {
+      name: values.name,
+      email: values.email,
+      ...(hasPasswordChange && {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      }),
+    };
+
     setSaving(true);
     try {
       const response = await fetch(`${API_URL}/api/users/profile`, {
@@ -164,7 +215,7 @@ const Profile = () => {
             JSON.parse(localStorage.getItem("user")).token
           }`,
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(dataToUpdate),
       });
 
       const data = await response.json();
@@ -187,7 +238,7 @@ const Profile = () => {
         description: "Profile updated successfully",
       });
 
-      window.history.back();
+      navigate(-1);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -298,9 +349,14 @@ const Profile = () => {
                 />
               </div>
 
-              <Button type="submit" disabled={saving}>
-                {saving ? <LoadingSpinner /> : "Save Changes"}
-              </Button>
+              <div className="flex space-x-4">
+                <Button type="submit" disabled={saving}>
+                  {saving ? <LoadingSpinner /> : "Save Changes"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>

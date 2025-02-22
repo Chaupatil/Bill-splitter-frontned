@@ -68,6 +68,17 @@ export const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader>
+              <ReceiptText className="h-8 w-8 text-primary" />
+              <CardTitle>Personal Finance</CardTitle>
+              <CardDescription>
+                Keep a detailed record of your personal expenses and income
+                sources.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <IndianRupee className="h-8 w-8 text-primary" />
               <CardTitle>Track Expenses</CardTitle>
               <CardDescription>
@@ -83,17 +94,6 @@ export const Home = () => {
               <CardDescription>
                 Create and organize expense groups, and invite friends to
                 contribute.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <ReceiptText className="h-8 w-8 text-primary" />
-              <CardTitle>Personal Finance</CardTitle>
-              <CardDescription>
-                Keep a detailed record of your personal expenses and income
-                sources.
               </CardDescription>
             </CardHeader>
           </Card>
