@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
@@ -13,32 +13,150 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { format, startOfMonth } from "date-fns";
+import {
+  format,
+  differenceInDays,
+  differenceInMonths,
+  differenceInYears,
+} from "date-fns";
 
 const PersonalExpenseDashboard = ({ stats, dateRange }) => {
   if (!stats || !stats.monthlyData || !stats.categoryDistribution) {
     return <div>No data available for the selected period.</div>;
   }
 
-  // In PersonalExpenseDashboard.jsx
-  const monthlyChartData = stats.monthlyData.map((item) => {
-    // Make sure we're using the correct date format parsing
-    // The item.month is expected to be in "YYYY-MM" format
-    const [year, month] = item.month.split("-").map(Number);
+  // Calculate analytics metrics
+  const analyticsMetrics = useMemo(() => {
+    // Calculate total amounts
+    const totalDebit = stats.categoryDistribution.reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
 
-    // Create a date object manually to avoid timezone issues
-    // Use the 15th day of month to avoid any end-of-month/start-of-month timezone issues
-    const date = new Date(year, month - 1, 15);
+    const totalCredit = stats.monthlyData.reduce(
+      (sum, item) => sum + item.credit,
+      0
+    );
+
+    // Calculate time periods for averages
+    let daysDiff = 30; // Default to a month if no date range
+    let monthsDiff = 1;
+    let yearsDiff = monthsDiff / 12;
+
+    if (dateRange.from && dateRange.to) {
+      daysDiff = Math.max(
+        differenceInDays(dateRange.to, dateRange.from) + 1,
+        1
+      );
+      monthsDiff = Math.max(
+        differenceInMonths(dateRange.to, dateRange.from) + 1,
+        1
+      );
+      yearsDiff = Math.max(
+        differenceInYears(dateRange.to, dateRange.from) + 1,
+        1
+      );
+
+      // Handle edge case where months cross but it's less than a full month
+      if (monthsDiff < 1) {
+        monthsDiff = 1;
+      }
+
+      // Handle case where years cross but it's less than a full year
+      if (yearsDiff < 1) {
+        yearsDiff = monthsDiff / 12;
+      }
+    }
+
+    // Calculate spending metrics
+    const avgDailySpend = totalDebit / daysDiff;
+    const avgMonthlySpend = totalDebit / monthsDiff;
+    const avgYearlySpend = totalDebit * (12 / monthsDiff);
+
+    // Calculate income metrics
+    const avgDailyIncome = totalCredit / daysDiff;
+    const avgMonthlyIncome = totalCredit / monthsDiff;
+    const avgYearlyIncome = totalCredit * (12 / monthsDiff);
+
+    // Calculate savings rate
+    const savingsRate =
+      totalCredit > 0 ? ((totalCredit - totalDebit) / totalCredit) * 100 : 0;
+
+    // Find highest spending day/category combination (if available in data)
+    const highestSpendCategory =
+      stats.categoryDistribution.length > 0
+        ? stats.categoryDistribution.reduce((prev, current) =>
+            current.total > prev.total ? current : prev
+          )
+        : { _id: "N/A", total: 0 };
+
+    // Find month with highest spending
+    const highestSpendMonth =
+      stats.monthlyData.length > 0
+        ? stats.monthlyData.reduce((prev, current) =>
+            current.debit > prev.debit ? current : prev
+          )
+        : { month: "N/A", debit: 0 };
+
+    // Find month with highest income
+    const highestIncomeMonth =
+      stats.monthlyData.length > 0
+        ? stats.monthlyData.reduce((prev, current) =>
+            current.credit > prev.credit ? current : prev
+          )
+        : { month: "N/A", credit: 0 };
+
+    // Calculate spending trend (increasing or decreasing)
+    let spendingTrend = "stable";
+    if (stats.monthlyData.length >= 2) {
+      const sortedMonths = [...stats.monthlyData].sort((a, b) => {
+        const [yearA, monthA] = a.month.split("-").map(Number);
+        const [yearB, monthB] = b.month.split("-").map(Number);
+        return new Date(yearB, monthB - 1, 1) - new Date(yearA, monthA - 1, 1);
+      });
+
+      if (sortedMonths.length >= 2) {
+        const lastMonth = sortedMonths[0];
+        const previousMonth = sortedMonths[1];
+
+        const percentChange =
+          ((lastMonth.debit - previousMonth.debit) / previousMonth.debit) * 100;
+
+        if (percentChange > 5) {
+          spendingTrend = "increasing";
+        } else if (percentChange < -5) {
+          spendingTrend = "decreasing";
+        }
+      }
+    }
+
+    // Prepare data for daily spending trend if available
+    const spendingTrendData = stats.monthlyData.map((item) => {
+      const [year, month] = item.month.split("-").map(Number);
+      return {
+        name: format(new Date(year, month - 1, 15), "MMM yyyy"),
+        amount: item.debit,
+      };
+    });
 
     return {
-      name: format(date, "MMM yyyy"),
-      credit: parseFloat(item.credit.toFixed(2)),
-      debit: parseFloat(item.debit.toFixed(2)),
-      balance: parseFloat(item.balance.toFixed(2)),
-      // Store raw month data for debugging if needed
-      rawMonth: item.month,
+      totalDebit,
+      totalCredit,
+      avgDailySpend,
+      avgMonthlySpend,
+      avgYearlySpend,
+      avgDailyIncome,
+      avgMonthlyIncome,
+      avgYearlyIncome,
+      savingsRate,
+      highestSpendCategory,
+      highestSpendMonth,
+      highestIncomeMonth,
+      spendingTrend,
+      spendingTrendData,
     };
-  });
+  }, [stats, dateRange]);
+
   // Prepare category distribution data for pie chart
   const totalDebitAmount = stats.categoryDistribution.reduce(
     (sum, item) => sum + item.total,
@@ -53,6 +171,20 @@ const PersonalExpenseDashboard = ({ stats, dateRange }) => {
       percentage: ((item.total / totalDebitAmount) * 100).toFixed(1),
     }))
     .sort((a, b) => b.value - a.value);
+
+  // Format monthly chart data
+  const monthlyChartData = stats.monthlyData.map((item) => {
+    const [year, month] = item.month.split("-").map(Number);
+    const date = new Date(year, month - 1, 15);
+
+    return {
+      name: format(date, "MMM yyyy"),
+      credit: parseFloat(item.credit.toFixed(2)),
+      debit: parseFloat(item.debit.toFixed(2)),
+      balance: parseFloat(item.balance.toFixed(2)),
+      rawMonth: item.month,
+    };
+  });
 
   const COLORS = [
     "#0088FE",
@@ -71,21 +203,151 @@ const PersonalExpenseDashboard = ({ stats, dateRange }) => {
     "#af19ff",
   ];
 
-  const dateRangeLabel =
-    dateRange.from && dateRange.to
-      ? `${format(dateRange.from, "dd MMM yyyy")} - ${format(
-          dateRange.to,
-          "dd MMM yyyy"
-        )}`
-      : "All time";
+  // Get spending trend color
+  const getTrendColor = (trend) => {
+    switch (trend) {
+      case "increasing":
+        return "text-red-500";
+      case "decreasing":
+        return "text-green-500";
+      default:
+        return "text-blue-500";
+    }
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return `₹${amount.toFixed(2)}`;
+  };
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h2 className="text-xl font-medium">Expense Analysis</h2>
-        <p className="text-sm text-muted-foreground">{dateRangeLabel}</p>
       </div>
 
+      {/* New Analytics Overview Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Spending Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-4">
+              <h3 className="font-semibold">Average Spending</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Daily</span>
+                  <span className="font-medium">
+                    {formatCurrency(analyticsMetrics.avgDailySpend)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monthly</span>
+                  <span className="font-medium">
+                    {formatCurrency(analyticsMetrics.avgMonthlySpend)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Yearly (Projected)
+                  </span>
+                  <span className="font-medium">
+                    {formatCurrency(analyticsMetrics.avgYearlySpend)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">Income Analytics</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monthly Average</span>
+                  <span className="font-medium">
+                    {formatCurrency(analyticsMetrics.avgMonthlyIncome)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Savings Rate</span>
+                  <span className="font-medium">
+                    {analyticsMetrics.savingsRate.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Best Income Month
+                  </span>
+                  <span className="font-medium">
+                    {analyticsMetrics.highestIncomeMonth.month !== "N/A"
+                      ? format(
+                          new Date(
+                            analyticsMetrics.highestIncomeMonth.month.split(
+                              "-"
+                            )[0],
+                            analyticsMetrics.highestIncomeMonth.month.split(
+                              "-"
+                            )[1] - 1,
+                            15
+                          ),
+                          "MMM yyyy"
+                        )
+                      : "N/A"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">Spending Insights</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Top Expense Category
+                  </span>
+                  <span className="font-medium">
+                    {analyticsMetrics.highestSpendCategory._id}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Highest Spending Month
+                  </span>
+                  <span className="font-medium">
+                    {analyticsMetrics.highestSpendMonth.month !== "N/A"
+                      ? format(
+                          new Date(
+                            analyticsMetrics.highestSpendMonth.month.split(
+                              "-"
+                            )[0],
+                            analyticsMetrics.highestSpendMonth.month.split(
+                              "-"
+                            )[1] - 1,
+                            15
+                          ),
+                          "MMM yyyy"
+                        )
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Spending Trend</span>
+                  <span
+                    className={`font-medium ${getTrendColor(
+                      analyticsMetrics.spendingTrend
+                    )}`}
+                  >
+                    {analyticsMetrics.spendingTrend.charAt(0).toUpperCase() +
+                      analyticsMetrics.spendingTrend.slice(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Original Monthly Income & Expenses Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Monthly Income & Expenses</CardTitle>
@@ -110,6 +372,7 @@ const PersonalExpenseDashboard = ({ stats, dateRange }) => {
         </CardContent>
       </Card>
 
+      {/* Original Category Distribution Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Expense Categories</CardTitle>

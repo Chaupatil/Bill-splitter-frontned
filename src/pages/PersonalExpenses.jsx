@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { personalExpenseService } from "../services/personalExpenseService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalExpenseForm from "../components/PersonalExpenseForm";
 import PersonalExpensesList from "../components/PersonalExpensesList";
 import PersonalExpenseDashboard from "../components/PersonalExpenseDashboard";
 import { CalendarDateRangePicker } from "../components/CalendarDateRangePicker";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Calendar } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,9 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { format } from "date-fns";
 
 const PersonalExpenses = () => {
   const { toast } = useToast();
@@ -38,6 +41,7 @@ const PersonalExpenses = () => {
   const [editingExpense, setEditingExpense] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [dismissInstructions, setDismissInstructions] = useState(false);
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -58,6 +62,89 @@ const PersonalExpenses = () => {
     total: 0,
     pages: 1,
   });
+
+  // Predefined date ranges
+  const datePresets = [
+    { label: "Today", value: "today" },
+    { label: "Yesterday", value: "yesterday" },
+    { label: "This Week", value: "thisWeek" },
+    { label: "Last Week", value: "lastWeek" },
+    { label: "This Month", value: "thisMonth" },
+    { label: "Last Month", value: "lastMonth" },
+    { label: "This Year", value: "thisYear" },
+    { label: "Last Year", value: "lastYear" },
+  ];
+
+  // Apply predefined date range
+  const applyDatePreset = (preset) => {
+    const today = new Date();
+    let from, to;
+
+    switch (preset) {
+      case "today":
+        from = new Date(today);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "yesterday":
+        from = new Date(today);
+        from.setDate(from.getDate() - 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setDate(to.getDate() - 1);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "thisWeek":
+        from = new Date(today);
+        from.setDate(from.getDate() - from.getDay());
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "lastWeek":
+        from = new Date(today);
+        from.setDate(from.getDate() - from.getDay() - 7);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setDate(to.getDate() - to.getDay() - 1);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "thisMonth":
+        from = new Date(today.getFullYear(), today.getMonth(), 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "lastMonth":
+        from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today.getFullYear(), today.getMonth(), 0);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "thisYear":
+        from = new Date(today.getFullYear(), 0, 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today);
+        to.setHours(23, 59, 59, 999);
+        break;
+      case "lastYear":
+        from = new Date(today.getFullYear() - 1, 0, 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(today.getFullYear() - 1, 11, 31);
+        to.setHours(23, 59, 59, 999);
+        break;
+      default:
+        return;
+    }
+
+    setDateRange({ from, to });
+  };
+
+  const dateRangeLabel = `${format(dateRange.from, "dd MMM yyyy")} - ${format(
+    dateRange.to,
+    "dd MMM yyyy"
+  )}`;
 
   // Fetch expenses based on current filters and pagination
   const fetchExpenses = async () => {
@@ -108,11 +195,12 @@ const PersonalExpenses = () => {
   // Fetch statistics for dashboard
   const fetchStats = async () => {
     try {
-      const params = {
-        startDate: dateRange.from?.toISOString(),
-        endDate: dateRange.to?.toISOString(),
-      };
+      const params = {};
 
+      if (dateRange?.from) {
+        params.startDate = dateRange.from?.toISOString();
+        params.endDate = dateRange.to?.toISOString();
+      }
       const response = await personalExpenseService.getExpenseStats(params);
       setStats(response.data);
     } catch (error) {
@@ -187,9 +275,12 @@ const PersonalExpenses = () => {
       const params = {
         page: pagination.page,
         limit: pagination.limit,
-        startDate: dateRange.from?.toISOString(),
-        endDate: dateRange.to?.toISOString(),
       };
+
+      if (dateRange?.from) {
+        params.startDate = dateRange.from?.toISOString();
+        params.endDate = dateRange.to?.toISOString();
+      }
 
       // Fetch new data after deletion
       const response = await personalExpenseService.getPersonalExpenses(params);
@@ -246,23 +337,73 @@ const PersonalExpenses = () => {
     setPagination({ ...pagination, page: newPage });
   };
 
+  const [selectedRange, setSelectedRange] = useState(null); // Track selected range
+
+  const handleSelectChange = (value) => {
+    setSelectedRange(value);
+    applyDatePreset(value); // Apply the selected date preset
+  };
+
   return (
     <>
       {loading ? (
         <LoadingSpinner />
       ) : (
         <div className="container mx-auto p-6 space-y-6">
+          {!dismissInstructions && (
+            <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+              <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-sm">
+                <span className="font-medium">Date Range Filter:</span> Select a
+                date range using the calendar picker to view expenses or
+                dashboard data for that specific period. By default, you are
+                viewing data for the current month. Use the 'Select Range'
+                dropdown to select common time periods.
+                <Button
+                  variant="link"
+                  className="text-xs ml-2 p-0 h-auto"
+                  onClick={() => setDismissInstructions(true)}
+                >
+                  Dismiss
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex flex-col gap-4">
             <h1 className="text-3xl font-bold text-center md:text-left">
               Personal Expenses
             </h1>
-            <div className="flex flex-col sm:flex-row justify-center md:justify-end items-center gap-4 w-full">
-              <div className="w-full sm:w-auto">
-                <CalendarDateRangePicker
-                  date={dateRange}
-                  setDate={handleDateRangeChange}
-                  className="w-full sm:w-auto"
-                />
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                  <Select onValueChange={handleSelectChange}>
+                    <SelectTrigger className="w-full sm:w-40">
+                      {/* If a range is selected, display it; otherwise, show the placeholder */}
+                      <SelectValue
+                        placeholder={
+                          selectedRange
+                            ? datePresets.find(
+                                (preset) => preset.value === selectedRange
+                              )?.label
+                            : "Select Range"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {datePresets.map((preset) => (
+                        <SelectItem key={preset.value} value={preset.value}>
+                          {preset.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <CalendarDateRangePicker
+                    date={dateRange}
+                    setDate={handleDateRangeChange}
+                    className="w-full sm:w-auto"
+                  />
+                </div>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
@@ -344,7 +485,9 @@ const PersonalExpenses = () => {
               </CardContent>
             </Card>
           </div>
-
+          <div className="text-center mb-6">
+            <p className="text-sm text-muted-foreground">{dateRangeLabel}</p>
+          </div>
           <Tabs defaultValue="list" className="w-full">
             <TabsList className="w-full max-w-md mx-auto grid grid-cols-2">
               <TabsTrigger value="list">Expenses List</TabsTrigger>
