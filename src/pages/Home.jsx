@@ -36,7 +36,7 @@ export const Home = () => {
             <CardContent>
               <Button
                 size="lg"
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={() => navigate("/personal-expenses")}
               >
                 Go to Personal Expenses
@@ -55,7 +55,7 @@ export const Home = () => {
             <CardContent>
               <Button
                 size="lg"
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={() => navigate("/expenses")}
               >
                 Go to Group Expenses

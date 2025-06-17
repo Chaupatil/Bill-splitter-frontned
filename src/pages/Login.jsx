@@ -151,7 +151,11 @@ const Login = () => {
             </div>
           </CardContent>
           <CardFooter className="flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Login"}
               <LogIn className="ml-2 h-4 w-4" />
             </Button>

@@ -124,6 +124,7 @@ export const FriendsList = ({
               size="icon"
               onClick={() => handleDeleteClick(index)}
               title="Remove friend"
+              className="cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -149,6 +150,7 @@ export const FriendsList = ({
           variant="outline"
           onClick={handleAddFriend}
           disabled={loading || friends.length >= 20}
+          className="cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add

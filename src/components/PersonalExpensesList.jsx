@@ -102,6 +102,7 @@ const PersonalExpensesList = ({
                     size="sm"
                     onClick={() => onEdit(expense)}
                     disabled={isDeleting}
+                    className="cursor-pointer"
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -111,6 +112,7 @@ const PersonalExpensesList = ({
                     className="text-red-500 hover:text-red-600"
                     onClick={() => handleDeleteClick(expense)}
                     disabled={isDeleting}
+                    cursor-pointer
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -159,13 +161,14 @@ const PersonalExpensesList = ({
                         size="icon"
                         onClick={() => onEdit(expense)}
                         disabled={isDeleting}
+                        className="cursor-pointer"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="text-red-500 hover:text-red-600"
+                        className="text-red-500 hover:text-red-600 cursor-pointer"
                         onClick={() => handleDeleteClick(expense)}
                         disabled={isDeleting}
                       >
@@ -241,10 +244,12 @@ const PersonalExpensesList = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 cursor-pointer"
               disabled={isDeleting}
             >
               {isDeleting ? (

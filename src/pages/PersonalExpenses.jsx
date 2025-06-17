@@ -75,6 +75,8 @@ const PersonalExpenses = () => {
     { label: "Last Year", value: "lastYear" },
   ];
 
+  const [selectedRange, setSelectedRange] = useState(null); // Track selected range
+
   // Apply predefined date range
   const applyDatePreset = (preset) => {
     const today = new Date();
@@ -312,8 +314,11 @@ const PersonalExpenses = () => {
     setDialogOpen(true);
   };
 
-  // Handle date range change
+  // Handle date range change from calendar picker
   const handleDateRangeChange = (range) => {
+    // Reset the selectedRange when user manually selects dates
+    setSelectedRange(null);
+
     // If range is null, set to today
     if (!range || (!range.from && !range.to)) {
       const today = new Date();
@@ -337,8 +342,7 @@ const PersonalExpenses = () => {
     setPagination({ ...pagination, page: newPage });
   };
 
-  const [selectedRange, setSelectedRange] = useState(null); // Track selected range
-
+  // Handle select dropdown change
   const handleSelectChange = (value) => {
     setSelectedRange(value);
     applyDatePreset(value); // Apply the selected date preset
@@ -361,7 +365,7 @@ const PersonalExpenses = () => {
                 dropdown to select common time periods.
                 <Button
                   variant="link"
-                  className="text-xs ml-2 p-0 h-auto"
+                  className="text-xs ml-2 p-0 h-auto cursor-pointer"
                   onClick={() => setDismissInstructions(true)}
                 >
                   Dismiss
@@ -376,22 +380,20 @@ const PersonalExpenses = () => {
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
               <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                  <Select onValueChange={handleSelectChange}>
-                    <SelectTrigger className="w-full sm:w-40">
-                      {/* If a range is selected, display it; otherwise, show the placeholder */}
-                      <SelectValue
-                        placeholder={
-                          selectedRange
-                            ? datePresets.find(
-                                (preset) => preset.value === selectedRange
-                              )?.label
-                            : "Select Range"
-                        }
-                      />
+                  <Select
+                    value={selectedRange}
+                    onValueChange={handleSelectChange}
+                  >
+                    <SelectTrigger className="w-full sm:w-40 cursor-pointer">
+                      <SelectValue placeholder="Select Range" />
                     </SelectTrigger>
                     <SelectContent>
                       {datePresets.map((preset) => (
-                        <SelectItem key={preset.value} value={preset.value}>
+                        <SelectItem
+                          key={preset.value}
+                          value={preset.value}
+                          className="cursor-pointer"
+                        >
                           {preset.label}
                         </SelectItem>
                       ))}
@@ -407,7 +409,7 @@ const PersonalExpenses = () => {
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto cursor-pointer">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Expense
                   </Button>
@@ -490,8 +492,12 @@ const PersonalExpenses = () => {
           </div>
           <Tabs defaultValue="list" className="w-full">
             <TabsList className="w-full max-w-md mx-auto grid grid-cols-2">
-              <TabsTrigger value="list">Expenses List</TabsTrigger>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="list" className="cursor-pointer">
+                Expenses List
+              </TabsTrigger>
+              <TabsTrigger value="dashboard" className="cursor-pointer">
+                Dashboard
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="list" className="mt-6">

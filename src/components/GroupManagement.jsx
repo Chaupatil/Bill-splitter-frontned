@@ -253,9 +253,9 @@ export const GroupManagement = ({
                   setInputValues(newValues);
                   setFriends(newValues);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 " />
               </Button>
             )}
           </div>
@@ -270,12 +270,16 @@ export const GroupManagement = ({
         {expenseGroups.length > 0 ? (
           <>
             <Select value={currentGroupId} onValueChange={onGroupChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] cursor-pointer">
                 <SelectValue placeholder="Select group" />
               </SelectTrigger>
               <SelectContent>
                 {expenseGroups.map((group) => (
-                  <SelectItem key={group._id} value={group._id}>
+                  <SelectItem
+                    key={group._id}
+                    value={group._id}
+                    className="cursor-pointer"
+                  >
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span className="text-xs text-muted-foreground">
@@ -295,10 +299,10 @@ export const GroupManagement = ({
                     variant="outline"
                     size="sm"
                     onClick={() => openDialog("isEditOpen")}
-                    className="group flex-1 sm:flex-none"
+                    className="group flex-1 sm:flex-none cursor-pointer"
                     title="Edit group"
                   >
-                    <Edit className="h-4 w-4 mr-1 group-hover:text-primary" />
+                    <Edit className="h-4 w-4 mr-1 group-hover:text-primary " />
                     Edit
                   </Button>
 
@@ -306,10 +310,10 @@ export const GroupManagement = ({
                     variant="destructive"
                     size="sm"
                     onClick={() => openDialog("isDeleteOpen")}
-                    className="group flex-1 sm:flex-none"
+                    className="group flex-1 sm:flex-none cursor-pointer"
                     title="Delete group"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <Trash2 className="h-4 w-4 mr-1 " />
                     Delete
                   </Button>
                 </>
@@ -319,7 +323,7 @@ export const GroupManagement = ({
                 variant="outline"
                 size="sm"
                 onClick={() => openDialog("isCreateOpen")}
-                className="group flex-1 sm:flex-none"
+                className="group flex-1 sm:flex-none cursor-pointer"
                 title="Create new group"
               >
                 <Plus className="h-4 w-4 mr-1 group-hover:text-primary" />
@@ -330,7 +334,7 @@ export const GroupManagement = ({
         ) : (
           <Button
             onClick={() => openDialog("isCreateOpen")}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto cursor-pointer"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create New Group
@@ -385,7 +389,7 @@ export const GroupManagement = ({
                 onClick={() =>
                   handleFriendListChange(groupFriends, setGroupFriends, "add")
                 }
-                className="mt-2"
+                className="mt-2 cursor-pointer"
                 disabled={groupFriends.length >= MAX_FRIENDS}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -401,10 +405,15 @@ export const GroupManagement = ({
                 closeAllDialogs();
                 resetCreateForm();
               }}
+              className="cursor-pointer"
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateGroup} disabled={loading}>
+            <Button
+              onClick={handleCreateGroup}
+              className="cursor-pointer"
+              disabled={loading}
+            >
               Create Group
             </Button>
           </DialogFooter>
@@ -462,20 +471,28 @@ export const GroupManagement = ({
                     "add"
                   )
                 }
-                className="mt-2"
+                className="mt-2 cursor-pointer"
                 disabled={editGroupFriends.length >= MAX_FRIENDS}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2 cursor-pointer" />
                 Add Friend
               </Button>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => closeAllDialogs()}>
+            <Button
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() => closeAllDialogs()}
+            >
               Cancel
             </Button>
-            <Button onClick={handleUpdateGroup} disabled={loading}>
+            <Button
+              onClick={handleUpdateGroup}
+              className="cursor-pointer"
+              disabled={loading}
+            >
               Update Group
             </Button>
           </DialogFooter>
@@ -501,11 +518,16 @@ export const GroupManagement = ({
           </DialogHeader>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => closeAllDialogs()}>
+            <Button
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() => closeAllDialogs()}
+            >
               Cancel
             </Button>
             <Button
               variant="destructive"
+              className="cursor-pointer"
               onClick={handleDeleteGroup}
               disabled={loading}
             >

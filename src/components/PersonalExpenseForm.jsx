@@ -129,15 +129,21 @@ const PersonalExpenseForm = ({
               <FormLabel>Transaction Type</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="cursor-pointer">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="credit" className="text-green-600">
+                  <SelectItem
+                    value="credit"
+                    className="text-green-600 cursor-pointer"
+                  >
                     Credit (Money In)
                   </SelectItem>
-                  <SelectItem value="debit" className="text-red-600">
+                  <SelectItem
+                    value="debit"
+                    className="text-red-600 cursor-pointer"
+                  >
                     Debit (Money Out)
                   </SelectItem>
                 </SelectContent>
@@ -155,13 +161,17 @@ const PersonalExpenseForm = ({
               <FormLabel>Category</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="cursor-pointer">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {expenseCategories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem
+                      key={category}
+                      value={category}
+                      className="cursor-pointer"
+                    >
                       {category}
                     </SelectItem>
                   ))}
@@ -201,7 +211,7 @@ const PersonalExpenseForm = ({
                   <FormControl>
                     <Button
                       variant={"outline"}
-                      className={`w-full pl-3 text-left font-normal ${
+                      className={`w-full pl-3 text-left font-normal cursor-pointer ${
                         !field.value && "text-muted-foreground"
                       }`}
                     >
@@ -233,7 +243,7 @@ const PersonalExpenseForm = ({
 
         <Button
           type="submit"
-          className="w-full"
+          className="w-full cursor-pointer"
           disabled={isSubmitting || isLoading}
         >
           {isSubmitting || isLoading ? (

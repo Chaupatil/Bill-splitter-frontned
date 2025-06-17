@@ -367,12 +367,20 @@ export const GroupExpenses = () => {
           {loading && !currentGroup && <LoadingSpinner />}
 
           {currentGroup && (
-            <Tabs defaultValue="expenses" className="space-y-6">
+            <Tabs defaultValue="expenses" className="space-y-6 ">
               <TabsList>
-                <TabsTrigger value="expenses">Expenses</TabsTrigger>
-                <TabsTrigger value="summary">Summary</TabsTrigger>
-                <TabsTrigger value="friends">Friends</TabsTrigger>
-                <TabsTrigger value="settlements">Settlements</TabsTrigger>
+                <TabsTrigger value="expenses" className="cursor-pointer">
+                  Expenses
+                </TabsTrigger>
+                <TabsTrigger value="summary" className="cursor-pointer">
+                  Summary
+                </TabsTrigger>
+                <TabsTrigger value="friends" className="cursor-pointer">
+                  Friends
+                </TabsTrigger>
+                <TabsTrigger value="settlements" className="cursor-pointer">
+                  Settlements
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="expenses" className="space-y-6">

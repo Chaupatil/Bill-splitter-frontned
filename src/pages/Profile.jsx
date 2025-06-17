@@ -350,10 +350,19 @@ const Profile = () => {
               </div>
 
               <div className="flex space-x-4">
-                <Button type="submit" disabled={saving}>
+                <Button
+                  type="submit"
+                  className="cursor-pointer"
+                  disabled={saving}
+                >
                   {saving ? <LoadingSpinner /> : "Save Changes"}
                 </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="cursor-pointer"
+                  onClick={handleCancel}
+                >
                   Cancel
                 </Button>
               </div>

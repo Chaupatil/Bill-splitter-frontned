@@ -82,6 +82,7 @@ export const ExpensesList = ({ expenses, onDeleteExpense }) => {
                 variant="destructive"
                 size="icon"
                 onClick={() => handleDeleteClick(expense._id)}
+                className="cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -104,10 +105,18 @@ export const ExpensesList = ({ expenses, onDeleteExpense }) => {
           </DialogHeader>
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleCancelDelete}>
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="cursor-pointer"
+            >
               Delete
             </Button>
           </DialogFooter>

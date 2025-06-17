@@ -56,19 +56,27 @@ const Navbar = () => {
               <>
                 <div className="hidden md:flex space-x-4">
                   <Link to="/personal-expenses">
-                    <Button variant="ghost">Personal Expenses</Button>
+                    <Button variant="ghost" className="cursor-pointer">
+                      Personal Expenses
+                    </Button>
                   </Link>
                   <Link to="/expenses">
-                    <Button variant="ghost">Group Expenses</Button>
+                    <Button variant="ghost" className="cursor-pointer">
+                      Group Expenses
+                    </Button>
                   </Link>
                 </div>
                 <DropdownMenu open={open} onOpenChange={setOpen}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative cursor-pointer"
+                    >
                       <Menu className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 ">
                     <DropdownMenuLabel>Menu</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -87,12 +95,16 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="md:hidden" />
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => handleNavigation("/profile")}
                     >
-                      <User className="mr-2 h-4 w-4" />
+                      <User className="mr-2 h-4 w-4 " />
                       <span>{user.name}</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>
@@ -102,10 +114,12 @@ const Navbar = () => {
             ) : (
               <div className="flex space-x-2">
                 <Link to="/login">
-                  <Button variant="ghost">Login</Button>
+                  <Button variant="ghost" className="cursor-pointer">
+                    Login
+                  </Button>
                 </Link>
                 <Link to="/register">
-                  <Button>Sign Up</Button>
+                  <Button className="cursor-pointer">Sign Up</Button>
                 </Link>
               </div>
             )}

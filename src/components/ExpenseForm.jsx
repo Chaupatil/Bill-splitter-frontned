@@ -349,7 +349,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                     <FormControl>
                       <select
                         {...field}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
+                        className="flex h-10 w-full cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
                       >
                         <option value="">Select person</option>
                         {friends.map((friend, index) =>
@@ -378,7 +378,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal shadow-sm",
+                              "w-full pl-3 text-left font-normal shadow-sm cursor-pointer",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -414,7 +414,7 @@ export const ExpenseForm = ({ onAddExpense, friends, loading }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full md:w-auto"
+              className="w-full md:w-auto cursor-pointer"
               size="lg"
             >
               <Plus className="h-4 w-4 mr-2" />
