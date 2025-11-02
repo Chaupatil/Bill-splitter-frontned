@@ -90,4 +90,26 @@ export const personalExpenseService = {
     if (!response.ok) throw new Error("Failed to fetch expense statistics");
     return response.json();
   },
+
+  uploadCSV: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+      `${API_URL}/api/personal-expenses/upload-csv`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: getHeaders().Authorization,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to upload CSV");
+    }
+    return response.json();
+  },
 };

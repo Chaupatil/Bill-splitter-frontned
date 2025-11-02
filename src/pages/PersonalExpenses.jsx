@@ -26,6 +26,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { format } from "date-fns";
+import CSVUploadDialog from "../components/CSVUploadDialog";
+import { Upload } from "lucide-react";
 
 const PersonalExpenses = () => {
   const { toast } = useToast();
@@ -42,6 +44,7 @@ const PersonalExpenses = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dismissInstructions, setDismissInstructions] = useState(false);
+  const [csvDialogOpen, setCsvDialogOpen] = useState(false);
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -407,6 +410,7 @@ const PersonalExpenses = () => {
                   />
                 </div>
               </div>
+              {/* Add Expense Dialog */}
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full sm:w-auto cursor-pointer">
@@ -434,6 +438,31 @@ const PersonalExpenses = () => {
                   />
                 </DialogContent>
               </Dialog>
+
+              {/* Separate CSV Upload Dialog Trigger */}
+              <Button
+                variant="outline"
+                onClick={() => setCsvDialogOpen(true)}
+                className="w-full cursor-pointer sm:w-auto"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Import CSV
+              </Button>
+
+              <CSVUploadDialog
+                open={csvDialogOpen}
+                onOpenChange={setCsvDialogOpen}
+                onSuccess={(result) => {
+                  toast({
+                    title: "CSV Imported",
+                    description: `Imported ${result.imported} expenses${
+                      result.failed > 0 ? `, ${result.failed} failed` : ""
+                    }`,
+                  });
+                  fetchExpenses();
+                  fetchStats();
+                }}
+              />
             </div>
           </div>
 
