@@ -15,7 +15,13 @@ import PersonalExpensesList from "../components/PersonalExpensesList";
 import PersonalExpenseDashboard from "../components/PersonalExpenseDashboard";
 import { CalendarDateRangePicker } from "../components/CalendarDateRangePicker";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Calendar } from "lucide-react";
+import {
+  PlusCircle,
+  Calendar,
+  Upload,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +33,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { format } from "date-fns";
 import CSVUploadDialog from "../components/CSVUploadDialog";
-import { Upload } from "lucide-react";
+import MultiAddExpensesDialog from "@/components/MultiAddExpensesDialog";
 
 const PersonalExpenses = () => {
   const { toast } = useToast();
@@ -45,6 +51,7 @@ const PersonalExpenses = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [dismissInstructions, setDismissInstructions] = useState(false);
   const [csvDialogOpen, setCsvDialogOpen] = useState(false);
+  const [multiAddOpen, setMultiAddOpen] = useState(false);
   const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -246,6 +253,24 @@ const PersonalExpenses = () => {
     }
   };
 
+  const handleBulkAdd = async (expenses) => {
+    try {
+      await personalExpenseService.addMultipleExpenses(expenses);
+      toast({
+        title: "Success",
+        description: `${expenses.length} expenses added.`,
+      });
+      fetchExpenses();
+      fetchStats();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add multiple expenses",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Handle updating an expense
   const handleUpdateExpense = async (id, formData) => {
     setIsSubmitting(true);
@@ -311,6 +336,27 @@ const PersonalExpenses = () => {
     }
   };
 
+  const handleBulkDelete = async (ids) => {
+    setIsDeleting(true);
+    try {
+      await personalExpenseService.deleteMultipleExpenses(ids);
+      toast({
+        title: "Success",
+        description: `${ids.length} expenses deleted successfully`,
+      });
+      fetchExpenses();
+      fetchStats();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete selected expenses",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Open edit dialog
   const openEditDialog = (expense) => {
     setEditingExpense(expense);
@@ -338,6 +384,37 @@ const PersonalExpenses = () => {
       setDateRange(newRange);
     }
     setPagination({ ...pagination, page: 1 }); // Reset to first page on filter change
+  };
+
+  const handleMonthChange = (direction) => {
+    const currentFrom = new Date(dateRange.from);
+    let year = currentFrom.getFullYear();
+    let month = currentFrom.getMonth();
+
+    if (direction === "prev") {
+      // Move to previous month
+      month -= 1;
+      if (month < 0) {
+        month = 11;
+        year -= 1;
+      }
+    } else if (direction === "next") {
+      // Move to next month
+      month += 1;
+      if (month > 11) {
+        month = 0;
+        year += 1;
+      }
+    }
+
+    // Set start (first day) and end (last day) of the new month
+    const newFrom = new Date(year, month, 1);
+    newFrom.setHours(0, 0, 0, 0);
+
+    const newTo = new Date(year, month + 1, 0);
+    newTo.setHours(23, 59, 59, 999);
+
+    setDateRange({ from: newFrom, to: newTo });
   };
 
   // Handle page change
@@ -368,7 +445,7 @@ const PersonalExpenses = () => {
                 dropdown to select common time periods.
                 <Button
                   variant="link"
-                  className="text-xs ml-2 p-0 h-auto cursor-pointer"
+                  className="text-xs text-red-500 ml-2 p-0 h-auto cursor-pointer"
                   onClick={() => setDismissInstructions(true)}
                 >
                   Dismiss
@@ -438,6 +515,19 @@ const PersonalExpenses = () => {
                   />
                 </DialogContent>
               </Dialog>
+
+              <Button
+                onClick={() => setMultiAddOpen(true)}
+                className="w-full sm:w-auto cursor-pointer"
+              >
+                + Add Multiple Expenses
+              </Button>
+
+              <MultiAddExpensesDialog
+                open={multiAddOpen}
+                onOpenChange={setMultiAddOpen}
+                onSave={handleBulkAdd}
+              />
 
               {/* Separate CSV Upload Dialog Trigger */}
               <Button
@@ -516,9 +606,30 @@ const PersonalExpenses = () => {
               </CardContent>
             </Card>
           </div>
-          <div className="text-center mb-6">
-            <p className="text-sm text-muted-foreground">{dateRangeLabel}</p>
+          <div className="flex justify-center items-center gap-4 mb-6">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleMonthChange("prev")}
+              className="h-8 w-8 cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <p className="text-sm text-muted-foreground min-w-[120px] text-center">
+              {format(dateRange.from, "MMMM yyyy")}
+            </p>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleMonthChange("next")}
+              className="h-8 w-8 cursor-pointer"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
+
           <Tabs defaultValue="list" className="w-full">
             <TabsList className="w-full max-w-md mx-auto grid grid-cols-2">
               <TabsTrigger value="list" className="cursor-pointer">
@@ -541,6 +652,7 @@ const PersonalExpenses = () => {
                   onPageChange={handlePageChange}
                   onEdit={openEditDialog}
                   onDelete={handleDeleteExpense}
+                  onBulkDelete={handleBulkDelete} // 👈 new
                   isLoading={loading}
                 />
               )}

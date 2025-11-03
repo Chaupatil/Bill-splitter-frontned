@@ -41,6 +41,17 @@ export const personalExpenseService = {
     return response.json();
   },
 
+  // Bulk add
+  addMultipleExpenses: async (expenses) => {
+    const response = await fetch(`${API_URL}/api/personal-expenses/bulk-add`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ expenses }),
+    });
+    if (!response.ok) throw new Error("Failed to add multiple expenses");
+    return response.json();
+  },
+
   // Get a single personal expense
   getPersonalExpenseById: async (id) => {
     const response = await fetch(`${API_URL}/api/personal-expenses/${id}`, {
@@ -72,6 +83,20 @@ export const personalExpenseService = {
     });
 
     if (!response.ok) throw new Error("Failed to delete personal expense");
+    return response.json();
+  },
+
+  // Bulk delete
+  deleteMultipleExpenses: async (ids) => {
+    const response = await fetch(
+      `${API_URL}/api/personal-expenses/bulk-delete`,
+      {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ ids }),
+      }
+    );
+    if (!response.ok) throw new Error("Failed to delete selected expenses");
     return response.json();
   },
 

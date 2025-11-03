@@ -36,11 +36,14 @@ const PersonalExpensesList = ({
   onPageChange,
   onEdit,
   onDelete,
+  onBulkDelete,
   isLoading = false,
 }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false); // 👈 new state
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const handleDeleteClick = (expense) => {
     setExpenseToDelete(expense);
@@ -60,6 +63,36 @@ const PersonalExpensesList = ({
     }
   };
 
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === expenses.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(expenses.map((e) => e._id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onBulkDelete(selectedIds);
+      setSelectedIds([]);
+    } finally {
+      setIsDeleting(false);
+      setBulkDeleteDialogOpen(false);
+    }
+  };
+
   if (!expenses || expenses.length === 0) {
     return (
       <div className="text-center p-10 bg-muted/20 rounded-md">
@@ -74,59 +107,38 @@ const PersonalExpensesList = ({
   return (
     <>
       <div className="space-y-4">
-        {/* Mobile View */}
-        <div className="md:hidden space-y-4">
-          {expenses.map((expense) => (
-            <div key={expense._id} className="border rounded-lg p-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(expense.date), "dd MMM yyyy")}
-                </span>
-                <span className="text-sm font-medium">{expense.category}</span>
-              </div>
-              <p className="text-sm">{expense.description}</p>
-              <div className="flex justify-between items-center">
-                <span
-                  className={`font-medium ${
-                    expense.type === "credit"
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {expense.type === "credit" ? "+" : "-"} ₹
-                  {expense.amount.toFixed(2)}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(expense)}
-                    disabled={isDeleting}
-                    className="cursor-pointer"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-500 hover:text-red-600"
-                    onClick={() => handleDeleteClick(expense)}
-                    disabled={isDeleting}
-                    cursor-pointer
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Bulk delete toolbar */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              onChange={toggleSelectAll}
+              checked={
+                selectedIds.length === expenses.length && expenses.length > 0
+              }
+            />
+            <span className="text-sm">Select All</span>
+          </div>
+          {selectedIds.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkDelete}
+              disabled={isDeleting}
+              className="flex cursor-pointer items-center"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete Selected ({selectedIds.length})
+            </Button>
+          )}
         </div>
 
-        {/* Desktop View */}
+        {/* Desktop Table */}
         <div className="hidden md:block rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
@@ -137,6 +149,13 @@ const PersonalExpensesList = ({
             <TableBody>
               {expenses.map((expense) => (
                 <TableRow key={expense._id}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(expense._id)}
+                      onChange={() => toggleSelect(expense._id)}
+                    />
+                  </TableCell>
                   <TableCell>
                     {format(new Date(expense.date), "dd MMM yyyy")}
                   </TableCell>
@@ -161,14 +180,13 @@ const PersonalExpensesList = ({
                         size="icon"
                         onClick={() => onEdit(expense)}
                         disabled={isDeleting}
-                        className="cursor-pointer"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="text-red-500 hover:text-red-600 cursor-pointer"
+                        className="text-red-500 hover:text-red-600"
                         onClick={() => handleDeleteClick(expense)}
                         disabled={isDeleting}
                       >
@@ -182,6 +200,7 @@ const PersonalExpensesList = ({
           </Table>
         </div>
 
+        {/* Pagination unchanged */}
         {pagination && pagination.pages > 1 && (
           <Pagination className="justify-center">
             <PaginationContent>
@@ -234,6 +253,7 @@ const PersonalExpensesList = ({
         )}
       </div>
 
+      {/* Single Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -244,22 +264,40 @@ const PersonalExpensesList = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-500 hover:bg-red-600 cursor-pointer"
+              className="bg-red-500 hover:bg-red-600"
               disabled={isDeleting}
             >
-              {isDeleting ? (
-                <div className="flex items-center">
-                  <LoadingSpinner className="mr-2 h-4 w-4" />
-                  <span>Deleting...</span>
-                </div>
-              ) : (
-                "Delete"
-              )}
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 🆕 Bulk Delete Confirmation Dialog */}
+      <AlertDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Selected Expenses</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <strong>{selectedIds.length}</strong> selected expense
+              {selectedIds.length > 1 ? "s" : ""}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-red-500 hover:bg-red-600"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : `Delete (${selectedIds.length})`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
