@@ -536,7 +536,7 @@ const PersonalExpenses = () => {
                 className="w-full cursor-pointer sm:w-auto"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Import CSV
+                Import CSV/EXCEL
               </Button>
 
               <CSVUploadDialog
@@ -544,8 +544,8 @@ const PersonalExpenses = () => {
                 onOpenChange={setCsvDialogOpen}
                 onSuccess={(result) => {
                   toast({
-                    title: "CSV Imported",
-                    description: `Imported ${result.imported} expenses${
+                    title: "File Imported",
+                    description: `Imported ${result.imported} expense${
                       result.failed > 0 ? `, ${result.failed} failed` : ""
                     }`,
                   });

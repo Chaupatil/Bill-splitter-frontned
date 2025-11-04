@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "./fetchWithAuth";
+
 const getHeaders = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -20,7 +22,7 @@ export const personalExpenseService = {
       url.searchParams.append(key, params[key])
     );
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -31,7 +33,7 @@ export const personalExpenseService = {
 
   // Add new personal expense
   addPersonalExpense: async (expenseData) => {
-    const response = await fetch(`${API_URL}/api/personal-expenses`, {
+    const response = await fetchWithAuth(`${API_URL}/api/personal-expenses`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(expenseData),
@@ -43,21 +45,27 @@ export const personalExpenseService = {
 
   // Bulk add
   addMultipleExpenses: async (expenses) => {
-    const response = await fetch(`${API_URL}/api/personal-expenses/bulk-add`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ expenses }),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/api/personal-expenses/bulk-add`,
+      {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ expenses }),
+      }
+    );
     if (!response.ok) throw new Error("Failed to add multiple expenses");
     return response.json();
   },
 
   // Get a single personal expense
   getPersonalExpenseById: async (id) => {
-    const response = await fetch(`${API_URL}/api/personal-expenses/${id}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/api/personal-expenses/${id}`,
+      {
+        method: "GET",
+        headers: getHeaders(),
+      }
+    );
 
     if (!response.ok) throw new Error("Failed to fetch personal expense");
     return response.json();
@@ -65,11 +73,14 @@ export const personalExpenseService = {
 
   // Update personal expense
   updatePersonalExpense: async (id, expenseData) => {
-    const response = await fetch(`${API_URL}/api/personal-expenses/${id}`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(expenseData),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/api/personal-expenses/${id}`,
+      {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(expenseData),
+      }
+    );
 
     if (!response.ok) throw new Error("Failed to update personal expense");
     return response.json();
@@ -77,10 +88,13 @@ export const personalExpenseService = {
 
   // Delete personal expense
   deletePersonalExpense: async (id) => {
-    const response = await fetch(`${API_URL}/api/personal-expenses/${id}`, {
-      method: "DELETE",
-      headers: getHeaders(),
-    });
+    const response = await fetchWithAuth(
+      `${API_URL}/api/personal-expenses/${id}`,
+      {
+        method: "DELETE",
+        headers: getHeaders(),
+      }
+    );
 
     if (!response.ok) throw new Error("Failed to delete personal expense");
     return response.json();
@@ -88,7 +102,7 @@ export const personalExpenseService = {
 
   // Bulk delete
   deleteMultipleExpenses: async (ids) => {
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/api/personal-expenses/bulk-delete`,
       {
         method: "POST",
@@ -107,7 +121,7 @@ export const personalExpenseService = {
       url.searchParams.append(key, params[key])
     );
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -116,11 +130,11 @@ export const personalExpenseService = {
     return response.json();
   },
 
-  uploadCSV: async (file) => {
+  uploadFile: async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_URL}/api/personal-expenses/upload-csv`,
       {
         method: "POST",
